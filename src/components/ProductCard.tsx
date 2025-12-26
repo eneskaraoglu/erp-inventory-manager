@@ -1,9 +1,16 @@
-function ProductCard(){
+interface ProductCardProps{
+    name: string
+    price: number
+    quantity: number
+}
+
+
+function ProductCard({name, price, quantity}:ProductCardProps){
     return(
         <div>
-            <h3>Product name</h3>
-            <p>Price: £9.99</p>
-            <p>Quantity: 50</p>
+            <h3>{name}</h3>
+            <p>Price: {price}</p>
+            <p>Quantity: {quantity}</p>
         </div>
     )
 }
