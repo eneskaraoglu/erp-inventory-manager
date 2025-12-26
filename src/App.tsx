@@ -1,13 +1,28 @@
 import './App.css'
 import ProductCard from './components/ProductCard'
 
+  const products = [
+  { id: 1, name: "Laptop", price: 999.99, quantity: 25 },
+  { id: 2, name: "Mouse", price: 29.99, quantity: 150 },
+  { id: 3, name: "Keyboard", price: 79.99, quantity: 75 },
+  { id: 4, name: "Monitor", price: 349.99, quantity: 40 },
+  { id: 5, name: "Webcam", price: 89.99, quantity: 60 },
+]
+
 function App() {
   return(
   <div>
     <h1>ERP Inventory Manager</h1>
-    <ProductCard name="Laptıp" price={999.99} quantity={21} />
-    <ProductCard name="Mouse" price={4.99} quantity={100} />
-    <ProductCard name="Table" price={99.99} quantity={5} />
+    {
+      products.map(product => (
+        <ProductCard
+        key={product.id}
+        name={product.name}
+        price={product.price}
+        quantity={product.quantity}
+        />
+      ))
+    }
   </div>
   )
 }
