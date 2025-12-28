@@ -1,5 +1,6 @@
 import './App.css'
 import ProductCard from './components/ProductCard'
+import { useState } from 'react'
 
   const products = [
   { id: 1, name: "Laptop", price: 999.99, quantity: 25 },
@@ -10,11 +11,19 @@ import ProductCard from './components/ProductCard'
 ]
 
 function App() {
+  const [searchTerm, setSearchTerm] = useState('')
+  const filteredProducts = products.filter(product => product.name.toLowerCase().includes(searchTerm.toLowerCase()) ) 
   return(
   <div>
     <h1>ERP Inventory Manager</h1>
+    <input 
+      type='text' 
+      placeholder='SEARCH Product'
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value) }
+    ></input>
     {
-      products.map(product => (
+      filteredProducts.map(product => (
         <ProductCard
         key={product.id}
         name={product.name}
