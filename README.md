@@ -2,6 +2,8 @@
 npm install
 npm run dev
 
+npm install -D @tailwindcss/postcss
+
 
 # React + TypeScript + Vite
 
