@@ -21,6 +21,10 @@ function App() {
     setProducts([...products, { ...product, id: Date.now() }])
   }
 
+  const handleDeleteProduct = (id: number) => {
+  setProducts(products.filter(product => product.id !== id))
+}
+
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
@@ -42,9 +46,11 @@ function App() {
           {filteredProducts.map(product => (
             <ProductCard
               key={product.id}
+              id={product.id}
               name={product.name}
               price={product.price}
               quantity={product.quantity}
+              onDelete={handleDeleteProduct}
             />
           ))}
         </div>

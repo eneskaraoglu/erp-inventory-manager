@@ -1,10 +1,12 @@
 interface ProductCardProps {
+  id: number
   name: string
   price: number
   quantity: number
+  onDelete: (id: number) => void
 }
 
-function ProductCard({ name, price, quantity }: ProductCardProps) {
+function ProductCard({ id, name, price, quantity, onDelete }: ProductCardProps)  {
   return (
     <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow">
       <h3 className="text-lg font-semibold text-gray-800">{name}</h3>
@@ -15,6 +17,12 @@ function ProductCard({ name, price, quantity }: ProductCardProps) {
           {" "}{quantity}
         </span>
       </p>
+      <button
+        onClick={() => onDelete(id)}
+        className="mt-3 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+      >
+        Delete
+      </button>
     </div>
   )
 }
