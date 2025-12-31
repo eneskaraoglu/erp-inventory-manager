@@ -1,17 +1,28 @@
 import './App.css'
 import ProductCard from './components/ProductCard'
 import AddProductForm from './components/AddProductForm'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function App() {
-  const [products, setProducts] = useState([
-    { id: 1, name: "Laptop", price: 999.99, quantity: 25 },
-    { id: 2, name: "Mouse", price: 29.99, quantity: 150 },
-    { id: 3, name: "Keyboard", price: 79.99, quantity: 75 },
-    { id: 4, name: "Monitor", price: 349.99, quantity: 40 },
-    { id: 5, name: "Webcam", price: 89.99, quantity: 60 },
-  ])
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem('products')
+    if (saved) {
+      return JSON.parse(saved)
+    }
+    return [
+      { id: 1, name: "Laptop", price: 999.99, quantity: 25 },
+      { id: 2, name: "Mouse", price: 29.99, quantity: 150 },
+      { id: 3, name: "Keyboard", price: 79.99, quantity: 75 },
+      { id: 4, name: "Monitor", price: 349.99, quantity: 40 },
+      { id: 5, name: "Webcam", price: 89.99, quantity: 60 },
+    ]
+  })
+
   const [searchTerm, setSearchTerm] = useState('')
+
+  useEffect(() => {
+    localStorage.setItem('products', JSON.stringify(products))
+  }, [products])
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
