@@ -3,7 +3,7 @@ npm install
 npm run dev
 
 npm install -D @tailwindcss/postcss
-
+npm install react-router-dom
 
 # React + TypeScript + Vite
 
