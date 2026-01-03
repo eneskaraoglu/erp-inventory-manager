@@ -1,6 +1,6 @@
-import CustomerCard from "../../components/customer/cutomerCard";
+import CustomerCard from "../../components/customer/CustomerCard";
 
-function CustomerPager(){
+function CustomerPage(){
     return(
         <div>
             <div className="flex justify-between items-center mb-6">
@@ -14,4 +14,4 @@ function CustomerPager(){
     )
 }
 
-export default CustomerPager
+export default CustomerPage

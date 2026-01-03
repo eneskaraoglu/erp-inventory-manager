@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import type { Product } from '../types'
 
 interface ProductDetailPageProps {
+  
   products: Product[]
   onDelete: (id: number) => void
 }
