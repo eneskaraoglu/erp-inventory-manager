@@ -45,6 +45,16 @@ function Layout({ children }: { children: React.ReactNode }) {
               >
                 Products
               </Link>
+              <Link
+                to="/customers"
+                className={`px-3 py-2 rounded-md ${
+                  location.pathname.startsWith('/customers')
+                    ? 'bg-blue-100 text-blue-600' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Customer
+              </Link>
             </div>
           </div>
         </div>

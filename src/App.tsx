@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import type { Product, NewProduct } from './types'
+import type { Product, NewProduct, Customer } from './types'
 
 // Layout
 import Layout from './components/layout/Layout'
@@ -10,8 +10,9 @@ import Dashboard from './pages/Dashboard'
 import ProductsPage from './pages/ProductsPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import AddProductPage from './pages/AddProductPage'
+import CustomersPage from './pages/Customer/CustomersPage'
 
-// Initial mock data
+// Initial mock data - Products
 const initialProducts: Product[] = [
   { id: 1, name: "Laptop", price: 999.99, quantity: 25 },
   { id: 2, name: "Mouse", price: 29.99, quantity: 150 },
@@ -20,8 +21,15 @@ const initialProducts: Product[] = [
   { id: 5, name: "Webcam", price: 89.99, quantity: 5 },
 ]
 
+// Initial mock data - Customers
+const initialCustomers: Customer[] = [
+  { id: 1, name: "Acme Corporation", code: "A100", address: "123 Main St, Texas, USA", phone: "555-0100", taxNumber: 123456789 },
+  { id: 2, name: "TechStart Ltd", code: "T200", address: "456 Tech Ave, California, USA", phone: "555-0200", taxNumber: 987654321 },
+  { id: 3, name: "Global Trade Co", code: "G300", address: "789 Trade Blvd, New York, USA", phone: "555-0300", taxNumber: 456789123 },
+]
+
 function App() {
-  // Load products from localStorage or use initial data
+  // ============ PRODUCTS STATE ============
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem('products')
     if (saved) {
@@ -30,16 +38,14 @@ function App() {
     return initialProducts
   })
 
-  // Save to localStorage whenever products change
   useEffect(() => {
     localStorage.setItem('products', JSON.stringify(products))
   }, [products])
 
-  // Handler functions
   const handleAddProduct = (product: NewProduct) => {
     const newProduct: Product = {
       ...product,
-      id: Date.now()  // Simple ID generation
+      id: Date.now()
     }
     setProducts([...products, newProduct])
   }
@@ -48,47 +54,66 @@ function App() {
     setProducts(products.filter(product => product.id !== id))
   }
 
+  // ============ CUSTOMERS STATE ============
+  const [customers, setCustomers] = useState<Customer[]>(() => {
+    const saved = localStorage.getItem('customers')
+    if (saved) {
+      return JSON.parse(saved)
+    }
+    return initialCustomers
+  })
+
+  useEffect(() => {
+    localStorage.setItem('customers', JSON.stringify(customers))
+  }, [customers])
+
+  const handleDeleteCustomer = (id: number) => {
+    setCustomers(customers.filter(customer => customer.id !== id))
+  }
+
   return (
-    // BrowserRouter enables routing - wraps entire app
-    // Like: Application context in Java
     <BrowserRouter>
       <Layout>
-        {/* Routes defines the URL → Component mapping */}
-        {/* Like: web.xml servlet mappings */}
         <Routes>
-          {/* Dashboard - home page */}
-          <Route 
-            path="/" 
-            element={<Dashboard products={products} />} 
+          {/* Dashboard */}
+          <Route
+            path="/"
+            element={<Dashboard products={products} />}
           />
-          
-          {/* Products list */}
-          <Route 
-            path="/products" 
+
+          {/* ============ PRODUCTS ROUTES ============ */}
+          <Route
+            path="/products"
             element={
-              <ProductsPage 
-                products={products} 
-                onDelete={handleDeleteProduct} 
+              <ProductsPage
+                products={products}
+                onDelete={handleDeleteProduct}
               />
-            } 
+            }
           />
-          
-          {/* Add new product */}
-          <Route 
-            path="/products/new" 
-            element={<AddProductPage onAdd={handleAddProduct} />} 
+          <Route
+            path="/products/new"
+            element={<AddProductPage onAdd={handleAddProduct} />}
           />
-          
-          {/* Product detail - :id is a URL parameter */}
-          {/* URL: /products/123 → id = "123" */}
-          <Route 
-            path="/products/:id" 
+          <Route
+            path="/products/:id"
             element={
-              <ProductDetailPage 
-                products={products} 
-                onDelete={handleDeleteProduct} 
+              <ProductDetailPage
+                products={products}
+                onDelete={handleDeleteProduct}
               />
-            } 
+            }
+          />
+
+          {/* ============ CUSTOMERS ROUTES ============ */}
+          <Route
+            path="/customers"
+            element={
+              <CustomersPage
+                customers={customers}
+                onDelete={handleDeleteCustomer}
+              />
+            }
           />
         </Routes>
       </Layout>
