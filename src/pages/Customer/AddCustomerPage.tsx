@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { NewCustomer } from '../../types'
+import { useCustomers } from '../../context/CustomerContext'
 
-interface AddCustomerPageProps {
-  onAdd: (customer: NewCustomer) => void
-}
-
-function AddCustomerPage({ onAdd }: AddCustomerPageProps) {
+function AddCustomerPage() {
   const navigate = useNavigate()
+  const { addCustomer } = useCustomers()  // From context!
 
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
@@ -19,7 +16,7 @@ function AddCustomerPage({ onAdd }: AddCustomerPageProps) {
     e.preventDefault()
     if (!name || !code) return
 
-    onAdd({
+    addCustomer({
       name,
       code,
       address,

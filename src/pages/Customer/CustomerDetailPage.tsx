@@ -1,14 +1,10 @@
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import type { Customer } from '../../types'
+import { useCustomers } from '../../context/CustomerContext'
 
-interface CustomerDetailPageProps {
-  customers: Customer[]
-  onDelete: (id: number) => void
-}
-
-function CustomerDetailPage({ customers, onDelete }: CustomerDetailPageProps) {
+function CustomerDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { customers, deleteCustomer } = useCustomers()  // From context!
 
   const customer = customers.find(c => c.id === Number(id))
 
@@ -25,7 +21,7 @@ function CustomerDetailPage({ customers, onDelete }: CustomerDetailPageProps) {
 
   const handleDelete = () => {
     if (window.confirm(`Delete "${customer.name}"?`)) {
-      onDelete(customer.id)
+      deleteCustomer(customer.id)
       navigate('/customers')
     }
   }
