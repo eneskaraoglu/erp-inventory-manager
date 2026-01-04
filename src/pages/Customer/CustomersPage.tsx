@@ -6,9 +6,10 @@ import CustomerCard from '../../components/customer/CustomerCard'
 interface CustomersPageProps {
   customers: Customer[]
   onDelete: (id: number) => void
+  resetCustomer: () => void
 }
 
-function CustomersPage({ customers, onDelete }: CustomersPageProps) {
+function CustomersPage({ customers, onDelete , resetCustomer}: CustomersPageProps) {
   const [searchTerm, setSearchTerm] = useState('')
 
   // Filter customers based on search (by name or code)
@@ -28,6 +29,12 @@ function CustomersPage({ customers, onDelete }: CustomersPageProps) {
         >
           + Add Customer
         </Link>
+        <button
+          onClick={() => resetCustomer()}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Reset Customer
+        </button>
       </div>
 
       {/* Search Bar */}
@@ -48,10 +55,9 @@ function CustomersPage({ customers, onDelete }: CustomersPageProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCustomers.map(customer => (
             <CustomerCard
-              key={customer.id}
+              adress={customer.address} number={customer.phone} vkno={customer.taxNumber} key={customer.id}
               {...customer}
-              onDelete={onDelete}
-            />
+              onDelete={onDelete}            />
           ))}
         </div>
       )}

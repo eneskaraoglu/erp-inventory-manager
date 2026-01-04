@@ -68,6 +68,11 @@ function App() {
     setCustomers(customers.filter(c => c.id !== id))
   }
 
+  const handleResetCustomer = () => {
+    localStorage.setItem('customers', JSON.stringify(initialCustomers))
+    setCustomers(initialCustomers)
+  }
+
   return (
     <BrowserRouter>
       <Layout>
@@ -81,7 +86,7 @@ function App() {
           <Route path="/products/:id" element={<ProductDetailPage products={products} onDelete={handleDeleteProduct} />} />
 
           {/* Customers */}
-          <Route path="/customers" element={<CustomersPage customers={customers} onDelete={handleDeleteCustomer} />} />
+          <Route path="/customers" element={<CustomersPage customers={customers} onDelete={handleDeleteCustomer} resetCustomer={handleResetCustomer} />} />
           <Route path="/customers/new" element={<AddCustomerPage onAdd={handleAddCustomer} />} />
           <Route path="/customers/:id" element={<CustomerDetailPage customers={customers} onDelete={handleDeleteCustomer} />} />
         </Routes>
