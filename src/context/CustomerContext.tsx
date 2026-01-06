@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext } from 'react'
 import type { Customer, NewCustomer } from '../types'
+import { useLocalStorage } from '../hooks'  // ✨ Our custom hook!
 
 // 1. Define interface
 interface CustomerContextType {
@@ -21,14 +22,10 @@ const initialCustomers: Customer[] = [
 
 // 4. Provider component
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
-  const [customers, setCustomers] = useState<Customer[]>(() => {
-    const saved = localStorage.getItem('customers')
-    return saved ? JSON.parse(saved) : initialCustomers
-  })
-
-  useEffect(() => {
-    localStorage.setItem('customers', JSON.stringify(customers))
-  }, [customers])
+  
+  // ✨ BEFORE: useState + useEffect (8 lines)
+  // ✨ AFTER:  useLocalStorage (1 line!)
+  const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', initialCustomers)
 
   const addCustomer = (customer: NewCustomer) => {
     setCustomers([...customers, { ...customer, id: Date.now() }])

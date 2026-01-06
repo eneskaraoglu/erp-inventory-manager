@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext } from 'react'
 import type { Product, NewProduct } from '../types'
+import { useLocalStorage } from '../hooks'  // ✨ Our custom hook!
 
 // ============================================
 // 1. DEFINE WHAT THE CONTEXT PROVIDES
 // ============================================
-// Like a Java Interface - defines the contract
 interface ProductContextType {
   products: Product[]
   addProduct: (product: NewProduct) => void
@@ -15,13 +15,11 @@ interface ProductContextType {
 // ============================================
 // 2. CREATE THE CONTEXT
 // ============================================
-// Like creating a Spring Bean definition
 const ProductContext = createContext<ProductContextType | undefined>(undefined)
 
 // ============================================
-// 3. CREATE THE PROVIDER COMPONENT
+// 3. INITIAL DATA
 // ============================================
-// Like @Configuration class that provides beans
 const initialProducts: Product[] = [
   { id: 1, name: "Laptop", price: 999.99, quantity: 25 },
   { id: 2, name: "Mouse", price: 29.99, quantity: 150 },
@@ -30,19 +28,16 @@ const initialProducts: Product[] = [
   { id: 5, name: "Webcam", price: 89.99, quantity: 5 },
 ]
 
+// ============================================
+// 4. CREATE THE PROVIDER COMPONENT
+// ============================================
 export function ProductProvider({ children }: { children: React.ReactNode }) {
-  // State lives HERE now, not in App.tsx
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('products')
-    return saved ? JSON.parse(saved) : initialProducts
-  })
+  
+  // ✨ BEFORE: useState + useEffect (8 lines)
+  // ✨ AFTER:  useLocalStorage (1 line!)
+  const [products, setProducts] = useLocalStorage<Product[]>('products', initialProducts)
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('products', JSON.stringify(products))
-  }, [products])
-
-  // All handler functions
+  // All handler functions remain the same
   const addProduct = (product: NewProduct) => {
     setProducts([...products, { ...product, id: Date.now() }])
   }
@@ -57,7 +52,6 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
     ))
   }
 
-  // Provide value to all children
   return (
     <ProductContext.Provider value={{ products, addProduct, deleteProduct, updateProduct }}>
       {children}
@@ -66,13 +60,11 @@ export function ProductProvider({ children }: { children: React.ReactNode }) {
 }
 
 // ============================================
-// 4. CREATE CUSTOM HOOK FOR EASY ACCESS
+// 5. CUSTOM HOOK FOR EASY ACCESS
 // ============================================
-// Like a factory method to get the service
 export function useProducts() {
   const context = useContext(ProductContext)
   
-  // Safety check - must be used inside Provider
   if (context === undefined) {
     throw new Error('useProducts must be used within a ProductProvider')
   }
