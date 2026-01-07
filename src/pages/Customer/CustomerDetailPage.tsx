@@ -56,7 +56,7 @@ function CustomerDetailPage() {
         </div>
 
         <div className="bg-gray-50 p-6 border-t flex gap-4">
-          <Link to={`/customers/${customer.id}/edit`} className="flex-1 bg-blue-500 text-white py-2 rounded text-center hover:bg-blue-600">
+          <Link to={`/customers/edit/${customer.id}`} className="flex-1 bg-blue-500 text-white py-2 rounded text-center hover:bg-blue-600">
             Edit
           </Link>
           <button onClick={handleDelete} className="flex-1 bg-red-500 text-white py-2 rounded hover:bg-red-600">
