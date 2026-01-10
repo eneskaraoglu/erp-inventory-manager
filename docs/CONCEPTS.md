@@ -14,6 +14,9 @@
 | for loop + add() | .map() + JSX | Rendering lists |
 | if/else for visibility | Conditional rendering | `{show && <Component />}` |
 | Servlet URL mapping | React Router | URL → Component |
+| Command Pattern | useReducer | Action-based state changes |
+| Component reference | useRef | DOM access |
+| Bean Validation | Zod | Form validation |
 
 ---
 
@@ -104,6 +107,157 @@ useEffect(() => {
 
 ---
 
+## useReducer Patterns ✨ NEW
+
+### When to Use
+- Multiple related state values
+- Complex state logic
+- Many actions on same state
+
+### Basic Pattern
+```tsx
+// 1. Define state type
+interface State {
+  items: Item[]
+  total: number
+}
+
+// 2. Define actions
+type Action =
+  | { type: 'ADD_ITEM'; payload: Item }
+  | { type: 'REMOVE_ITEM'; payload: { id: number } }
+  | { type: 'CLEAR' }
+
+// 3. Create reducer
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'ADD_ITEM':
+      return { ...state, items: [...state.items, action.payload] }
+    case 'REMOVE_ITEM':
+      return { ...state, items: state.items.filter(i => i.id !== action.payload.id) }
+    case 'CLEAR':
+      return { items: [], total: 0 }
+    default:
+      return state
+  }
+}
+
+// 4. Use in component
+const [state, dispatch] = useReducer(reducer, initialState)
+dispatch({ type: 'ADD_ITEM', payload: newItem })
+```
+
+### useState vs useReducer
+```tsx
+// useState - Simple, direct
+setCount(count + 1)
+
+// useReducer - Action-based
+dispatch({ type: 'INCREMENT' })
+```
+
+---
+
+## useRef Patterns ✨ NEW
+
+### DOM Reference
+```tsx
+const inputRef = useRef<HTMLInputElement>(null)
+
+// Attach to element
+<input ref={inputRef} />
+
+// Access DOM
+inputRef.current?.focus()
+inputRef.current?.select()
+```
+
+### Persist Value (no re-render)
+```tsx
+const renderCount = useRef(0)
+renderCount.current += 1  // Doesn't cause re-render!
+
+const prevValue = useRef(value)
+useEffect(() => {
+  prevValue.current = value  // Store previous
+}, [value])
+```
+
+### Timer Reference
+```tsx
+const intervalRef = useRef<number | null>(null)
+
+const start = () => {
+  intervalRef.current = setInterval(() => {}, 1000)
+}
+
+const stop = () => {
+  if (intervalRef.current) clearInterval(intervalRef.current)
+}
+```
+
+### useRef vs useState
+| useRef | useState |
+|--------|----------|
+| No re-render on change | Triggers re-render |
+| `.current` to access | Direct access |
+| For DOM / persist value | For UI state |
+
+---
+
+## Zod Validation Patterns ✨ NEW
+
+### Basic Schema
+```tsx
+import { z } from 'zod'
+
+const schema = z.object({
+  name: z.string().min(1, 'Required').max(100),
+  email: z.string().email('Invalid email'),
+  age: z.number().min(0).max(120),
+})
+```
+
+### String Validation
+```tsx
+z.string()
+  .min(1, 'Required')
+  .min(2, 'Too short')
+  .max(100, 'Too long')
+  .email('Invalid email')
+  .regex(/pattern/, 'Invalid format')
+```
+
+### Number from String (forms)
+```tsx
+z.string()
+  .min(1, 'Required')
+  .refine(v => !isNaN(Number(v)), 'Must be number')
+  .refine(v => Number(v) > 0, 'Must be positive')
+```
+
+### Validate Data
+```tsx
+// Throws error if invalid
+schema.parse(data)
+
+// Returns { success, data, error }
+const result = schema.safeParse(data)
+if (result.success) {
+  console.log(result.data)
+} else {
+  console.log(result.error.errors)
+}
+```
+
+### TypeScript Type from Schema
+```tsx
+type FormData = z.infer<typeof schema>
+// Creates: { name: string, email: string, age: number }
+```
+
+---
+
 ## Props Patterns
 
 ### Basic Props
@@ -161,6 +315,11 @@ function Card({ children }: Props) {
   e.preventDefault()  // Prevent page reload
   handleSubmit()
 }}>
+```
+
+### Blur (for validation)
+```tsx
+<input onBlur={(e) => validateField(e.target.name)} />
 ```
 
 ---
@@ -228,6 +387,33 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 }
 ```
 
+### Ref Types
+```tsx
+const inputRef = useRef<HTMLInputElement>(null)
+const divRef = useRef<HTMLDivElement>(null)
+```
+
+---
+
+## Built-in vs External
+
+### React Built-in Hooks
+```tsx
+import { useState, useEffect, useContext, useReducer, useRef } from 'react'
+```
+
+### External Libraries
+```tsx
+// Routing
+import { useParams, useNavigate } from 'react-router-dom'
+
+// Validation
+import { z } from 'zod'
+
+// Future: Data fetching
+import { useQuery } from '@tanstack/react-query'
+```
+
 ---
 
 ## Common Mistakes ❌
@@ -239,6 +425,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 | Mutating state directly | Use setter with spread |
 | Missing dependency in useEffect | Add to dependency array |
 | Infinite loop in useEffect | Check dependencies |
+| Mutating ref and expecting re-render | Use useState for UI updates |
+| Calling hooks conditionally | Always call at top level |
 
 ---
 
@@ -266,6 +454,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - `bg-blue-500` = background blue
 - `text-white` = white text
 - `hover:bg-blue-600` = darker on hover
+- `border-red-500` = red border (validation error)
 
 ### Responsive
 - `sm:` = 640px+
