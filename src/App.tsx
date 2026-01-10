@@ -19,13 +19,14 @@ import CustomerDetailPage from './pages/Customer/CustomerDetailPage'
 import AddCustomerPage from './pages/Customer/AddCustomerPage'
 import EditCustomerPage from './pages/Customer/EditCustomerPage'
 
-// Pages - Cart (useReducer demo!) ✨ NEW
+// Pages - Cart (useReducer demo!)
 import CartPage from './pages/CartPage'
 
 // Practice Pages (for learning exercises)
 import UseEffectPractice from './pages/practice/UseEffectPractice'
 import UseStatePractice from './pages/practice/UseStatePractice'
 import UseTogglePractice from './pages/practice/UseTogglePractice'
+import UseRefPractice from './pages/practice/UseRefPractice'  // ✨ NEW
 
 function App() {
   return (
@@ -47,13 +48,14 @@ function App() {
             <Route path="/customers/:id" element={<CustomerDetailPage />} />
             <Route path="/customers/edit/:id" element={<EditCustomerPage />} />
 
-            {/* Cart Route (useReducer demo!) ✨ NEW */}
+            {/* Cart Route (useReducer demo!) */}
             <Route path="/cart" element={<CartPage />} />
 
             {/* 🎯 Practice Routes (for learning exercises) */}
-            <Route path="/practice/useeffect" element={<UseEffectPractice />} />
             <Route path="/practice/usestate" element={<UseStatePractice />} />
+            <Route path="/practice/useeffect" element={<UseEffectPractice />} />
             <Route path="/practice/usetoggle" element={<UseTogglePractice />} />
+            <Route path="/practice/useref" element={<UseRefPractice />} />
           </Routes>
         </Layout>
       </BrowserRouter>
