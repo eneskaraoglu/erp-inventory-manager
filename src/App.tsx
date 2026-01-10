@@ -19,6 +19,9 @@ import CustomerDetailPage from './pages/Customer/CustomerDetailPage'
 import AddCustomerPage from './pages/Customer/AddCustomerPage'
 import EditCustomerPage from './pages/Customer/EditCustomerPage'
 
+// Pages - Cart (useReducer demo!) ✨ NEW
+import CartPage from './pages/CartPage'
+
 // Practice Pages (for learning exercises)
 import UseEffectPractice from './pages/practice/UseEffectPractice'
 import UseStatePractice from './pages/practice/UseStatePractice'
@@ -43,6 +46,9 @@ function App() {
             <Route path="/customers/new" element={<AddCustomerPage />} />
             <Route path="/customers/:id" element={<CustomerDetailPage />} />
             <Route path="/customers/edit/:id" element={<EditCustomerPage />} />
+
+            {/* Cart Route (useReducer demo!) ✨ NEW */}
+            <Route path="/cart" element={<CartPage />} />
 
             {/* 🎯 Practice Routes (for learning exercises) */}
             <Route path="/practice/useeffect" element={<UseEffectPractice />} />

@@ -1,10 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useCart } from '../../context/CartContext'  // ✨ NEW!
 
 // Layout component - wraps all pages
 // Like a JSF template or Swing JFrame with menu bar
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation()  // Gets current URL path
+  const { itemCount } = useCart() // ✨ Get cart item count
   
   // Helper to check if link is active
   const isActive = (path: string) => {
@@ -45,6 +47,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               >
                 Products
               </Link>
+              
               <Link
                 to="/customers"
                 className={`px-3 py-2 rounded-md ${
@@ -53,7 +56,24 @@ function Layout({ children }: { children: React.ReactNode }) {
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
-                Customer
+                Customers
+              </Link>
+
+              {/* ✨ NEW: Cart Link with Badge */}
+              <Link
+                to="/cart"
+                className={`px-3 py-2 rounded-md relative ${
+                  isActive('/cart')
+                    ? 'bg-blue-100 text-blue-600' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                🛒 Cart
+                {itemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {itemCount}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
