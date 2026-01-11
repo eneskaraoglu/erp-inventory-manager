@@ -1,23 +1,23 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useProducts } from '../context/ProductContext'
 import { useFormWithValidation } from '../hooks'
 import { productSchema, type ProductFormData } from '../validation/schemas'
 
+// ✨ NEW: Import React Query mutation instead of Context
+import { useCreateProduct } from '../hooks'
+
 /**
- * AddProductPage - WITH API INTEGRATION! ✨
+ * AddProductPage - WITH REACT QUERY! ✨
  * 
- * Changes from Session 4:
- * - Now sends data to FastAPI backend
- * - Shows loading state during submit
- * - Handles API errors
- * - Fields match backend schema
+ * Changes from Session 5:
+ * - Uses useMutation instead of context
+ * - No manual submitting/error state needed
+ * - Automatic cache invalidation
  */
 function AddProductPage() {
   const navigate = useNavigate()
-  const { addProduct, error: contextError } = useProducts()
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  
+  // ✨ React Query mutation - replaces addProduct from context
+  const createMutation = useCreateProduct()
 
   const {
     values,
@@ -43,35 +43,32 @@ function AddProductPage() {
       return
     }
 
-    try {
-      setSubmitting(true)
-      setSubmitError(null)
-
-      // Send to API (via context)
-      await addProduct({
+    // ✨ Use mutation instead of context
+    createMutation.mutate(
+      {
         name: values.name,
         description: values.description || undefined,
         price: parseFloat(values.price),
         stock: parseInt(values.stock),
         category: values.category || undefined,
-      })
-
-      navigate('/products')
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Failed to add product')
-    } finally {
-      setSubmitting(false)
-    }
+      },
+      {
+        // Navigate on success
+        onSuccess: () => {
+          navigate('/products')
+        },
+      }
+    )
   }
 
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Add New Product</h1>
 
-      {/* API Error Message */}
-      {(submitError || contextError) && (
+      {/* API Error Message - from mutation */}
+      {createMutation.error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
-          {submitError || contextError}
+          {createMutation.error.message}
         </div>
       )}
 
@@ -88,7 +85,7 @@ function AddProductPage() {
             value={values.name}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={submitting}
+            disabled={createMutation.isPending}
             className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
               ${getError('name') 
                 ? 'border-red-500 focus:ring-red-500' 
@@ -111,7 +108,7 @@ function AddProductPage() {
             value={values.description}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={submitting}
+            disabled={createMutation.isPending}
             rows={3}
             className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
               ${getError('description') 
@@ -136,7 +133,7 @@ function AddProductPage() {
             value={values.price}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={submitting}
+            disabled={createMutation.isPending}
             className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
               ${getError('price') 
                 ? 'border-red-500 focus:ring-red-500' 
@@ -160,7 +157,7 @@ function AddProductPage() {
             value={values.stock}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={submitting}
+            disabled={createMutation.isPending}
             className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
               ${getError('stock') 
                 ? 'border-red-500 focus:ring-red-500' 
@@ -184,7 +181,7 @@ function AddProductPage() {
             value={values.category}
             onChange={handleChange}
             onBlur={handleBlur}
-            disabled={submitting}
+            disabled={createMutation.isPending}
             className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
               ${getError('category') 
                 ? 'border-red-500 focus:ring-red-500' 
@@ -201,15 +198,15 @@ function AddProductPage() {
         <div className="flex gap-4">
           <button
             type="submit"
-            disabled={submitting}
+            disabled={createMutation.isPending}
             className="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? 'Adding...' : 'Add Product'}
+            {createMutation.isPending ? 'Adding...' : 'Add Product'}
           </button>
           <button
             type="button"
             onClick={() => navigate('/products')}
-            disabled={submitting}
+            disabled={createMutation.isPending}
             className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 font-medium disabled:opacity-50"
           >
             Cancel

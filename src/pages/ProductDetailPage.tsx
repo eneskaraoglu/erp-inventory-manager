@@ -1,16 +1,21 @@
-import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { useProducts } from '../context/ProductContext'
+
+// ✨ NEW: Import React Query hooks
+import { useProductQuery, useDeleteProduct } from '../hooks'
 
 function ProductDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
-  const { products, deleteProduct, loading, error } = useProducts()
-  const [deleting, setDeleting] = useState(false)
+  const productId = Number(id)
+
+  // ✨ React Query - fetch single product
+  const { data: product, isLoading, error } = useProductQuery(productId)
+
+  // ✨ React Query - delete mutation
+  const deleteMutation = useDeleteProduct()
 
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -22,15 +27,13 @@ function ProductDetailPage() {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
+        <p className="text-red-600 mb-4">{error.message}</p>
         <Link to="/products" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
           Back to Products
         </Link>
       </div>
     )
   }
-
-  const product = products.find(p => p.id === Number(id))
 
   if (!product) {
     return (
@@ -46,14 +49,11 @@ function ProductDetailPage() {
   const handleDelete = async () => {
     if (!window.confirm(`Delete "${product.name}"?`)) return
     
-    try {
-      setDeleting(true)
-      await deleteProduct(product.id)
-      navigate('/products')
-    } catch (err) {
-      console.error('Delete failed:', err)
-      setDeleting(false)
-    }
+    deleteMutation.mutate(product.id, {
+      onSuccess: () => {
+        navigate('/products')
+      }
+    })
   }
 
   const stockStatus = product.stock < 50 
@@ -67,6 +67,13 @@ function ProductDetailPage() {
         <span className="mx-2">/</span>
         <span>{product.name}</span>
       </div>
+
+      {/* Delete Error */}
+      {deleteMutation.error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+          {deleteMutation.error.message}
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="bg-gray-50 p-6 border-b">
@@ -123,10 +130,10 @@ function ProductDetailPage() {
           </Link>
           <button 
             onClick={handleDelete} 
-            disabled={deleting}
+            disabled={deleteMutation.isPending}
             className="flex-1 bg-red-500 text-white py-2 rounded hover:bg-red-600 disabled:opacity-50"
           >
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
           </button>
           <Link to="/products" className="flex-1 bg-gray-300 text-gray-700 py-2 rounded text-center hover:bg-gray-400">
             Back

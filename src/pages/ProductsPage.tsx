@@ -1,38 +1,43 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useProducts } from '../context/ProductContext'
 import ProductCard from '../components/ProductCard'
 
-function ProductsPage() {
-  // Get from context - now includes loading & error!
-  const { products, loading, error, deleteProduct } = useProducts()
-  
-  const [searchTerm, setSearchTerm] = useState('')
-  const [deleting, setDeleting] = useState<number | null>(null)
+// ✨ NEW: Import React Query hooks instead of Context
+import { useProductsQuery, useDeleteProduct } from '../hooks'
 
+function ProductsPage() {
+  // ============================================
+  // REACT QUERY - Replaces useProducts() context
+  // ============================================
+  const { 
+    data: products = [],  // Default to empty array
+    isLoading,            // Was: loading
+    error,                // Same name
+    refetch               // Bonus: manual refetch function
+  } = useProductsQuery()
+
+  // Delete mutation
+  const deleteMutation = useDeleteProduct()
+  
+  // Local state for search
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // Filter products
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  // Handle delete with loading state
+  // Handle delete - now uses mutation
   const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to delete this product?')) return
     
-    try {
-      setDeleting(id)
-      await deleteProduct(id)
-    } catch (err) {
-      // Error is already set in context
-      console.error('Delete failed:', err)
-    } finally {
-      setDeleting(null)
-    }
+    deleteMutation.mutate(id)
   }
 
   // ============================================
   // LOADING STATE
   // ============================================
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-center">
@@ -50,9 +55,9 @@ function ProductsPage() {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
         <p className="text-red-600 font-medium mb-2">Error loading products</p>
-        <p className="text-red-500 text-sm mb-4">{error}</p>
+        <p className="text-red-500 text-sm mb-4">{error.message}</p>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={() => refetch()}
           className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
         >
           Retry
@@ -73,6 +78,13 @@ function ProductsPage() {
         </Link>
       </div>
 
+      {/* Show delete error if any */}
+      {deleteMutation.error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <p className="text-red-600">Delete failed: {deleteMutation.error.message}</p>
+        </div>
+      )}
+
       <input
         type="text"
         placeholder="Search products..."
@@ -92,7 +104,7 @@ function ProductsPage() {
               key={product.id}
               {...product}
               onDelete={handleDelete}
-              isDeleting={deleting === product.id}
+              isDeleting={deleteMutation.isPending && deleteMutation.variables === product.id}
             />
           ))}
         </div>

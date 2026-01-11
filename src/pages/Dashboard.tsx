@@ -1,10 +1,17 @@
 import { Link } from 'react-router-dom'
-import { useProducts } from '../context/ProductContext'
+
+// ✨ NEW: Import React Query hook for products
+import { useProductsQuery } from '../hooks'
+
+// Still using Context for Customers and Users (you can refactor these later!)
 import { useCustomers } from '../context/CustomerContext'
 import { useUsers } from '../context/UserContext'
 
 function Dashboard() {
-  const { products, loading: productsLoading, error: productsError } = useProducts()
+  // ✨ React Query for products
+  const { data: products = [], isLoading: productsLoading, error: productsError } = useProductsQuery()
+  
+  // Context for customers and users (can be migrated to React Query later)
   const { customers, loading: customersLoading, error: customersError } = useCustomers()
   const { users, loading: usersLoading, error: usersError } = useUsers()
 
@@ -25,10 +32,11 @@ function Dashboard() {
 
   // Error state
   if (error) {
+    const errorMessage = error instanceof Error ? error.message : error
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
         <p className="text-red-600 font-medium mb-2">Error loading data</p>
-        <p className="text-red-500 text-sm mb-4">{error}</p>
+        <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
         <button 
           onClick={() => window.location.reload()}
           className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
