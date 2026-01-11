@@ -1,27 +1,38 @@
-import { useCart } from '../context/CartContext'
-import { useProducts } from '../context/ProductContext'
+// ✨ NEW: Import Zustand store instead of Context
+import { useCartStore } from '../stores'
+
+// Still using React Query for products
+import { useProductsQuery } from '../hooks'
 
 /**
- * CART PAGE
+ * CART PAGE - WITH ZUSTAND! ✨
  * 
- * Demonstrates useReducer in action:
- * - Adding items (from products)
- * - Updating quantities
- * - Removing items
- * - Clearing cart
- * - Calculated totals
+ * Changes:
+ * - useCartStore() instead of useCart()
+ * - No Provider needed!
+ * - Simpler API
  */
 
 function CartPage() {
-  // Get cart state and actions from context (powered by useReducer!)
-  const { items, total, itemCount, addItem, removeItem, updateQuantity, clearCart } = useCart()
+  // ✨ Zustand store - no Provider needed!
+  const items = useCartStore((state) => state.items)
+  const addItem = useCartStore((state) => state.addItem)
+  const removeItem = useCartStore((state) => state.removeItem)
+  const updateQuantity = useCartStore((state) => state.updateQuantity)
+  const clearCart = useCartStore((state) => state.clearCart)
+  const getTotal = useCartStore((state) => state.getTotal)
+  const getItemCount = useCartStore((state) => state.getItemCount)
   
-  // Get products to add to cart
-  const { products } = useProducts()
+  // React Query for products
+  const { data: products = [] } = useProductsQuery()
+  
+  // Get computed values
+  const total = getTotal()
+  const itemCount = getItemCount()
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">🛒 Shopping Cart (useReducer Demo)</h1>
+      <h1 className="text-2xl font-bold mb-6">🛒 Shopping Cart (Zustand Demo)</h1>
 
       {/* ==================== PRODUCTS TO ADD ==================== */}
       <section className="mb-8">
@@ -121,14 +132,13 @@ function CartPage() {
       )}
 
       {/* ==================== EXPLANATION ==================== */}
-      <section className="mt-8 p-4 bg-gray-100 rounded">
-        <h3 className="font-semibold mb-2">🎓 What's Happening?</h3>
+      <section className="mt-8 p-4 bg-green-50 rounded border border-green-200">
+        <h3 className="font-semibold mb-2">✨ Now Using Zustand!</h3>
         <ul className="text-sm space-y-1">
-          <li>• <strong>ADD_ITEM</strong> - Adds product or increases quantity if exists</li>
-          <li>• <strong>REMOVE_ITEM</strong> - Removes item completely</li>
-          <li>• <strong>UPDATE_QUANTITY</strong> - Changes quantity (removes if 0)</li>
-          <li>• <strong>CLEAR_CART</strong> - Removes all items</li>
-          <li>• <strong>Total & ItemCount</strong> - Calculated automatically by reducer!</li>
+          <li>• No Provider wrapper needed</li>
+          <li>• Simpler code (~60 lines vs ~200 lines)</li>
+          <li>• Selective re-renders (better performance)</li>
+          <li>• State persists across page navigation</li>
         </ul>
       </section>
     </div>

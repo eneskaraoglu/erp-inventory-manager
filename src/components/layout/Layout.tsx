@@ -1,12 +1,16 @@
 import { Link, useLocation } from 'react-router-dom'
-import { useCart } from '../../context/CartContext'  // ✨ NEW!
+
+// ✨ NEW: Zustand store instead of Context
+import { useCartStore } from '../../stores'
 
 // Layout component - wraps all pages
 // Like a JSF template or Swing JFrame with menu bar
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const location = useLocation()  // Gets current URL path
-  const { itemCount } = useCart() // ✨ Get cart item count
+  const location = useLocation()
+  
+  // ✨ Zustand - get only what we need (selective subscription)
+  const itemCount = useCartStore((state) => state.getItemCount())
   
   // Helper to check if link is active
   const isActive = (path: string) => {
