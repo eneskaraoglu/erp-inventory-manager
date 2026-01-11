@@ -3,33 +3,26 @@ import { z } from 'zod'
 /**
  * PRODUCT VALIDATION SCHEMA
  * 
- * JAVA COMPARISON:
- * ----------------
- * This is like Bean Validation annotations:
- * 
- * public class ProductDTO {
- *     @NotBlank(message = "Name is required")
- *     @Size(min = 2, max = 100, message = "Name must be 2-100 characters")
- *     private String name;
- *     
- *     @NotNull(message = "Price is required")
- *     @DecimalMin(value = "0.01", message = "Price must be at least 0.01")
- *     private BigDecimal price;
- *     
- *     @NotNull(message = "Quantity is required")
- *     @Min(value = 0, message = "Quantity cannot be negative")
- *     private Integer quantity;
- * }
- * 
- * Zod does the SAME thing but for TypeScript!
+ * Aligned with FastAPI backend:
+ * - name: str (required, 1-100 chars)
+ * - description: Optional[str] (max 500 chars)
+ * - price: float (required, > 0)
+ * - stock: int (required, >= 0)
+ * - category: Optional[str] (max 50 chars)
  */
 
 export const productSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name is required')                    // @NotBlank
-    .min(2, 'Name must be at least 2 characters')  // @Size(min=2)
-    .max(100, 'Name must be less than 100 characters'), // @Size(max=100)
+    .min(1, 'Name is required')
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name must be less than 100 characters'),
+  
+  description: z
+    .string()
+    .max(500, 'Description must be less than 500 characters')
+    .optional()
+    .or(z.literal('')),  // Allow empty string
   
   price: z
     .string()
@@ -37,29 +30,33 @@ export const productSchema = z.object({
     .refine((val) => !isNaN(Number(val)), 'Price must be a number')
     .refine((val) => Number(val) > 0, 'Price must be greater than 0'),
   
-  quantity: z
+  stock: z
     .string()
-    .min(1, 'Quantity is required')
-    .refine((val) => !isNaN(Number(val)), 'Quantity must be a number')
-    .refine((val) => Number(val) >= 0, 'Quantity cannot be negative')
-    .refine((val) => Number.isInteger(Number(val)), 'Quantity must be a whole number'),
+    .min(1, 'Stock is required')
+    .refine((val) => !isNaN(Number(val)), 'Stock must be a number')
+    .refine((val) => Number(val) >= 0, 'Stock cannot be negative')
+    .refine((val) => Number.isInteger(Number(val)), 'Stock must be a whole number'),
+  
+  category: z
+    .string()
+    .max(50, 'Category must be less than 50 characters')
+    .optional()
+    .or(z.literal('')),
 })
 
-/**
- * TypeScript type inferred from schema!
- * 
- * This creates:
- * type ProductFormData = {
- *   name: string
- *   price: string
- *   quantity: string
- * }
- */
 export type ProductFormData = z.infer<typeof productSchema>
 
 /**
  * CUSTOMER VALIDATION SCHEMA
+ * 
+ * Aligned with FastAPI backend:
+ * - name: str (required, 1-100 chars)
+ * - email: EmailStr (required)
+ * - phone: Optional[str] (max 20 chars)
+ * - address: Optional[str] (max 200 chars)
+ * - company: Optional[str] (max 100 chars)
  */
+
 export const customerSchema = z.object({
   name: z
     .string()
@@ -70,12 +67,25 @@ export const customerSchema = z.object({
   email: z
     .string()
     .min(1, 'Email is required')
-    .email('Invalid email format'),  // Built-in email validation!
+    .email('Invalid email format'),
   
   phone: z
     .string()
-    .min(1, 'Phone is required')
-    .regex(/^[0-9+\-\s()]+$/, 'Invalid phone format'),
+    .max(20, 'Phone must be less than 20 characters')
+    .optional()
+    .or(z.literal('')),
+  
+  address: z
+    .string()
+    .max(200, 'Address must be less than 200 characters')
+    .optional()
+    .or(z.literal('')),
+  
+  company: z
+    .string()
+    .max(100, 'Company must be less than 100 characters')
+    .optional()
+    .or(z.literal('')),
 })
 
 export type CustomerFormData = z.infer<typeof customerSchema>

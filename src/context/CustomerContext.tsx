@@ -1,58 +1,130 @@
-import { createContext, useContext } from 'react'
-import type { Customer, NewCustomer } from '../types'
-import { useLocalStorage } from '../hooks'  // ✨ Our custom hook!
+import { createContext, useContext, useState, useEffect } from 'react'
+import type { Customer, CustomerCreate } from '../types'
+import { customerApi } from '../services'
 
-// 1. Define interface
+// ============================================
+// 1. DEFINE WHAT THE CONTEXT PROVIDES
+// ============================================
 interface CustomerContextType {
+  // Data
   customers: Customer[]
-  addCustomer: (customer: NewCustomer) => void
-  deleteCustomer: (id: number) => void
-  updateCustomer: (id: number, customer: NewCustomer) => void
+  
+  // Loading & Error states
+  loading: boolean
+  error: string | null
+  
+  // Actions
+  addCustomer: (customer: CustomerCreate) => Promise<void>
+  deleteCustomer: (id: number) => Promise<void>
+  updateCustomer: (id: number, customer: Partial<CustomerCreate>) => Promise<void>
+  refreshCustomers: () => Promise<void>
 }
 
-// 2. Create context
+// ============================================
+// 2. CREATE THE CONTEXT
+// ============================================
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined)
 
-// 3. Initial data
-const initialCustomers: Customer[] = [
-  { id: 1, name: "Acme Corporation", code: "A100", address: "123 Main St, Texas, USA", phone: "555-0100", taxNumber: 123456789 },
-  { id: 2, name: "TechStart Ltd", code: "T200", address: "456 Tech Ave, California, USA", phone: "555-0200", taxNumber: 987654321 },
-  { id: 3, name: "Global Trade Co", code: "G300", address: "789 Trade Blvd, New York, USA", phone: "555-0300", taxNumber: 456789123 },
-]
-
-// 4. Provider component
+// ============================================
+// 3. CREATE THE PROVIDER COMPONENT
+// ============================================
 export function CustomerProvider({ children }: { children: React.ReactNode }) {
-  
-  // ✨ BEFORE: useState + useEffect (8 lines)
-  // ✨ AFTER:  useLocalStorage (1 line!)
-  const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', initialCustomers)
+  // State
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const addCustomer = (customer: NewCustomer) => {
-    setCustomers([...customers, { ...customer, id: Date.now() }])
+  // ============================================
+  // FETCH CUSTOMERS FROM API
+  // ============================================
+  const refreshCustomers = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const data = await customerApi.getAll()
+      setCustomers(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch customers')
+      console.error('Error fetching customers:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const deleteCustomer = (id: number) => {
-    setCustomers(customers.filter(c => c.id !== id))
+  // Fetch on mount
+  useEffect(() => {
+    refreshCustomers()
+  }, [])
+
+  // ============================================
+  // ADD CUSTOMER
+  // ============================================
+  const addCustomer = async (customer: CustomerCreate) => {
+    try {
+      setError(null)
+      const newCustomer = await customerApi.create(customer)
+      setCustomers(prev => [...prev, newCustomer])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add customer')
+      throw err
+    }
   }
 
-  const updateCustomer = (id: number, customer: NewCustomer) => {
-    setCustomers(customers.map(c => 
-      c.id === id ? { ...customer, id } : c
-    ))
+  // ============================================
+  // DELETE CUSTOMER
+  // ============================================
+  const deleteCustomer = async (id: number) => {
+    try {
+      setError(null)
+      await customerApi.delete(id)
+      setCustomers(prev => prev.filter(c => c.id !== id))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete customer')
+      throw err
+    }
+  }
+
+  // ============================================
+  // UPDATE CUSTOMER
+  // ============================================
+  const updateCustomer = async (id: number, customer: Partial<CustomerCreate>) => {
+    try {
+      setError(null)
+      const updatedCustomer = await customerApi.update(id, customer)
+      setCustomers(prev => prev.map(c => 
+        c.id === id ? updatedCustomer : c
+      ))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update customer')
+      throw err
+    }
   }
 
   return (
-    <CustomerContext.Provider value={{ customers, addCustomer, deleteCustomer, updateCustomer }}>
+    <CustomerContext.Provider value={{ 
+      customers, 
+      loading, 
+      error, 
+      addCustomer, 
+      deleteCustomer, 
+      updateCustomer,
+      refreshCustomers 
+    }}>
       {children}
     </CustomerContext.Provider>
   )
 }
 
-// 5. Custom hook
+// ============================================
+// 4. CUSTOM HOOK FOR EASY ACCESS
+// ============================================
 export function useCustomers() {
   const context = useContext(CustomerContext)
+  
   if (context === undefined) {
     throw new Error('useCustomers must be used within a CustomerProvider')
   }
+  
   return context
 }

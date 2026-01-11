@@ -4,15 +4,66 @@ import { useProducts } from '../context/ProductContext'
 import ProductCard from '../components/ProductCard'
 
 function ProductsPage() {
-  // Get from context - no props needed!
-  const { products, deleteProduct } = useProducts()
+  // Get from context - now includes loading & error!
+  const { products, loading, error, deleteProduct } = useProducts()
   
   const [searchTerm, setSearchTerm] = useState('')
+  const [deleting, setDeleting] = useState<number | null>(null)
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  // Handle delete with loading state
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    
+    try {
+      setDeleting(id)
+      await deleteProduct(id)
+    } catch (err) {
+      // Error is already set in context
+      console.error('Delete failed:', err)
+    } finally {
+      setDeleting(null)
+    }
+  }
+
+  // ============================================
+  // LOADING STATE
+  // ============================================
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================
+  // ERROR STATE
+  // ============================================
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p className="text-red-600 font-medium mb-2">Error loading products</p>
+        <p className="text-red-500 text-sm mb-4">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
+  // ============================================
+  // NORMAL RENDER
+  // ============================================
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -40,7 +91,8 @@ function ProductsPage() {
             <ProductCard
               key={product.id}
               {...product}
-              onDelete={deleteProduct}
+              onDelete={handleDelete}
+              isDeleting={deleting === product.id}
             />
           ))}
         </div>

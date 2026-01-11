@@ -1,79 +1,119 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCustomers } from '../../context/CustomerContext'
-import { useForm } from '../../hooks'  // ✨ Our new custom hook!
+import { useFormWithValidation } from '../../hooks'
+import { customerSchema, type CustomerFormData } from '../../validation/schemas'
 
 /**
- * AddCustomerPage - Refactored with useForm hook
- * 
- * BEFORE: 5 separate useState calls 😫
- * AFTER:  1 useForm call 😎
+ * AddCustomerPage - WITH API INTEGRATION & VALIDATION
  */
 function AddCustomerPage() {
   const navigate = useNavigate()
-  const { addCustomer } = useCustomers()
+  const { addCustomer, error: contextError } = useCustomers()
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-  // ✨ ONE hook handles ALL 5 form fields!
-  const { values, handleChange, resetForm } = useForm({
-    name: '',
-    code: '',
-    address: '',
-    phone: '',
-    taxNumber: ''
+  const {
+    values,
+    handleChange,
+    handleBlur,
+    validate,
+    getError,
+  } = useFormWithValidation<CustomerFormData>({
+    initialValues: {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      company: ''
+    },
+    schema: customerSchema,
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!values.name || !values.code) return
+    
+    if (!validate()) return
 
-    addCustomer({
-      name: values.name,
-      code: values.code,
-      address: values.address,
-      phone: values.phone,
-      taxNumber: parseInt(values.taxNumber) || 0
-    })
+    try {
+      setSubmitting(true)
+      setSubmitError(null)
 
-    navigate('/customers')
+      await addCustomer({
+        name: values.name,
+        email: values.email,
+        phone: values.phone || undefined,
+        address: values.address || undefined,
+        company: values.company || undefined
+      })
+
+      navigate('/customers')
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to add customer')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Add New Customer</h1>
 
+      {/* Error Message */}
+      {(submitError || contextError) && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+          {submitError || contextError}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+        {/* Name */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Customer Name *</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            Customer Name <span className="text-red-500">*</span>
+          </label>
           <input 
             type="text" 
             name="name"
             value={values.name} 
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            onBlur={handleBlur}
+            disabled={submitting}
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
+              ${getError('name') 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+              } disabled:bg-gray-100`}
           />
+          {getError('name') && (
+            <p className="text-red-500 text-sm mt-1">{getError('name')}</p>
+          )}
         </div>
 
+        {/* Email */}
         <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Code *</label>
+          <label className="block text-gray-700 font-medium mb-2">
+            Email <span className="text-red-500">*</span>
+          </label>
           <input 
-            type="text" 
-            name="code"
-            value={values.code} 
+            type="email" 
+            name="email"
+            value={values.email} 
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            onBlur={handleBlur}
+            disabled={submitting}
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
+              ${getError('email') 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+              } disabled:bg-gray-100`}
           />
+          {getError('email') && (
+            <p className="text-red-500 text-sm mt-1">{getError('email')}</p>
+          )}
         </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 font-medium mb-2">Address</label>
-          <input 
-            type="text" 
-            name="address"
-            value={values.address} 
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-          />
-        </div>
-
+        {/* Phone */}
         <div className="mb-4">
           <label className="block text-gray-700 font-medium mb-2">Phone</label>
           <input 
@@ -81,32 +121,74 @@ function AddCustomerPage() {
             name="phone"
             value={values.phone} 
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            onBlur={handleBlur}
+            disabled={submitting}
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
+              ${getError('phone') 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+              } disabled:bg-gray-100`}
           />
+          {getError('phone') && (
+            <p className="text-red-500 text-sm mt-1">{getError('phone')}</p>
+          )}
         </div>
 
-        <div className="mb-6">
-          <label className="block text-gray-700 font-medium mb-2">Tax Number</label>
-          <input 
-            type="number" 
-            name="taxNumber"
-            value={values.taxNumber} 
+        {/* Address */}
+        <div className="mb-4">
+          <label className="block text-gray-700 font-medium mb-2">Address</label>
+          <textarea 
+            name="address"
+            value={values.address} 
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+            onBlur={handleBlur}
+            disabled={submitting}
+            rows={2}
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
+              ${getError('address') 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+              } disabled:bg-gray-100`}
           />
+          {getError('address') && (
+            <p className="text-red-500 text-sm mt-1">{getError('address')}</p>
+          )}
+        </div>
+
+        {/* Company */}
+        <div className="mb-6">
+          <label className="block text-gray-700 font-medium mb-2">Company</label>
+          <input 
+            type="text" 
+            name="company"
+            value={values.company} 
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={submitting}
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 
+              ${getError('company') 
+                ? 'border-red-500 focus:ring-red-500' 
+                : 'border-gray-300 focus:ring-blue-500'
+              } disabled:bg-gray-100`}
+          />
+          {getError('company') && (
+            <p className="text-red-500 text-sm mt-1">{getError('company')}</p>
+          )}
         </div>
 
         <div className="flex gap-4">
           <button 
-            type="submit" 
-            className="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-medium"
+            type="submit"
+            disabled={submitting}
+            className="flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 font-medium disabled:opacity-50"
           >
-            Add Customer
+            {submitting ? 'Adding...' : 'Add Customer'}
           </button>
           <button 
             type="button" 
-            onClick={() => navigate('/customers')} 
-            className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 font-medium"
+            onClick={() => navigate('/customers')}
+            disabled={submitting}
+            className="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400 font-medium disabled:opacity-50"
           >
             Cancel
           </button>

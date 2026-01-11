@@ -5,10 +5,10 @@
 ```
 Phase 1: Fundamentals    [██████████] 100% ✅
 Phase 2: Intermediate    [██████████] 100% ✅
-Phase 3: Advanced        [░░░░░░░░░░] 0%
+Phase 3: Advanced        [████░░░░░░] 40%
 Phase 4: Professional    [░░░░░░░░░░] 0%
 ─────────────────────────────────────────
-Total Progress:          [██████░░░░] 50%
+Total Progress:          [███████░░░] 60%
 ```
 
 ---
@@ -21,9 +21,10 @@ Total Progress:          [██████░░░░] 50%
 | 2 | Jan 4, 2026 | ~2 hrs | React Router, useContext | ✅ |
 | 3 | Jan 7, 2026 | ~1.5 hrs | Custom Hooks, useForm, useLocalStorage | ✅ |
 | 4 | Jan 10, 2026 | ~2 hrs | useReducer, useRef, Zod Validation | ✅ |
-| 5 | TBD | TBD | API Integration, React Query | 📋 Planned |
+| 5 | Jan 11, 2026 | ~2 hrs | API Integration, Loading/Error States | ✅ |
+| 6 | TBD | TBD | React Query | 📋 Planned |
 
-**Total Time Invested: ~7.5 hours**
+**Total Time Invested: ~9.5 hours**
 
 ---
 
@@ -47,13 +48,13 @@ Total Progress:          [██████░░░░] 50%
 - [x] Custom Hooks
 - [x] useLocalStorage hook
 - [x] useForm hook
-- [x] useReducer ✅ Session 4
-- [x] useRef ✅ Session 4
-- [x] Form validation (Zod) ✅ Session 4
+- [x] useReducer
+- [x] useRef
+- [x] Form validation (Zod)
 
-### Phase 3 - Advanced (Next!)
-- [ ] API Integration (fetch/axios)
-- [ ] Loading & Error states
+### Phase 3 - Advanced (In Progress!)
+- [x] API Integration (fetch) ✅ Session 5
+- [x] Loading & Error states ✅ Session 5
 - [ ] React Query
 - [ ] Zustand state management
 - [ ] Error boundaries
@@ -69,22 +70,26 @@ Total Progress:          [██████░░░░] 50%
 ## 🛠️ Features Built
 
 ### Products Module ✅
-- [x] List all products
+- [x] List all products (from API!)
 - [x] View product detail
-- [x] Add new product (with validation!)
-- [x] Edit product
-- [x] Delete product
+- [x] Add new product (POST to API!)
+- [x] Edit product (PUT to API!)
+- [x] Delete product (DELETE to API!)
 - [x] Search/filter
+- [x] Loading states
+- [x] Error handling
 
 ### Customers Module ✅
-- [x] List all customers
+- [x] List all customers (from API!)
 - [x] View customer detail
-- [x] Add new customer
-- [x] Edit customer
-- [x] Delete customer
+- [x] Add new customer (POST to API!)
+- [x] Edit customer (PUT to API!)
+- [x] Delete customer (DELETE to API!)
 - [x] Search/filter
+- [x] Loading states
+- [x] Error handling
 
-### Shopping Cart ✅ NEW (Session 4)
+### Shopping Cart ✅
 - [x] Add items to cart
 - [x] Update quantity
 - [x] Remove items
@@ -92,16 +97,12 @@ Total Progress:          [██████░░░░] 50%
 - [x] Cart badge in navigation
 - [x] Total calculation
 
-### Custom Hooks ✅
-- [x] useLocalStorage - Persistent state
-- [x] useForm - Form state management
-- [x] useFormWithValidation - Form + Zod validation
-
-### Validation ✅ NEW (Session 4)
-- [x] Product schema (Zod)
-- [x] Customer schema (Zod)
-- [x] Real-time validation
-- [x] Error messages
+### API Integration ✅ NEW (Session 5)
+- [x] API service layer
+- [x] fetch() for HTTP requests
+- [x] Loading spinners
+- [x] Error messages with retry
+- [x] CORS configured
 
 ---
 
@@ -110,13 +111,14 @@ Total Progress:          [██████░░░░] 50%
 ```
 erp-inventory-manager/
 ├── docs/
-│   ├── SESSION_1.md           ✅
-│   ├── SESSION_2.md           ✅
-│   ├── SESSION_3.md           ✅
-│   ├── SESSION_4.md           ✅ NEW
-│   ├── PROGRESS.md            ✅
-│   ├── CONCEPTS.md            ✅
-│   └── FUNDAMENTALS_SUMMARY.md ✅
+│   ├── SESSION_1.md
+│   ├── SESSION_2.md
+│   ├── SESSION_3.md
+│   ├── SESSION_4.md
+│   ├── SESSION_5.md           ✅ NEW
+│   ├── PROGRESS.md
+│   ├── CONCEPTS.md
+│   └── FUNDAMENTALS_SUMMARY.md
 ├── src/
 │   ├── components/
 │   │   ├── layout/
@@ -127,40 +129,40 @@ erp-inventory-manager/
 │   │       └── CustomerCard.tsx
 │   ├── context/
 │   │   ├── AppProviders.tsx
-│   │   ├── ProductContext.tsx
-│   │   ├── CustomerContext.tsx
-│   │   └── CartContext.tsx     ✅ NEW
+│   │   ├── ProductContext.tsx  (API integrated!)
+│   │   ├── CustomerContext.tsx (API integrated!)
+│   │   └── CartContext.tsx
 │   ├── hooks/
 │   │   ├── index.ts
 │   │   ├── useLocalStorage.ts
 │   │   ├── useForm.ts
-│   │   └── useFormWithValidation.ts  ✅ NEW
-│   ├── reducers/               ✅ NEW FOLDER
+│   │   └── useFormWithValidation.ts
+│   ├── services/              ✅ NEW FOLDER
+│   │   ├── index.ts
+│   │   └── api.ts             (Product & Customer API)
+│   ├── reducers/
 │   │   ├── index.ts
 │   │   └── cartReducer.ts
-│   ├── validation/             ✅ NEW FOLDER
+│   ├── validation/
 │   │   ├── index.ts
 │   │   └── schemas.ts
 │   ├── types/
-│   │   ├── index.ts
-│   │   └── cart.ts             ✅ NEW
+│   │   ├── index.ts           (aligned with backend!)
+│   │   └── cart.ts
 │   ├── pages/
-│   │   ├── Dashboard.tsx
-│   │   ├── ProductsPage.tsx
+│   │   ├── Dashboard.tsx      (with loading/error)
+│   │   ├── ProductsPage.tsx   (with loading/error)
 │   │   ├── ProductDetailPage.tsx
-│   │   ├── AddProductPage.tsx   (with Zod validation)
+│   │   ├── AddProductPage.tsx
 │   │   ├── EditProductPage.tsx
-│   │   ├── CartPage.tsx         ✅ NEW
+│   │   ├── CartPage.tsx
 │   │   ├── Customer/
 │   │   │   ├── CustomersPage.tsx
 │   │   │   ├── CustomerDetailPage.tsx
 │   │   │   ├── AddCustomerPage.tsx
 │   │   │   └── EditCustomerPage.tsx
 │   │   └── practice/
-│   │       ├── UseStatePractice.tsx
-│   │       ├── UseEffectPractice.tsx
-│   │       ├── UseTogglePractice.tsx
-│   │       └── UseRefPractice.tsx  ✅ NEW
+│   │       └── ...
 │   └── App.tsx
 └── package.json
 ```
@@ -205,7 +207,8 @@ erp-inventory-manager/
 | 🔄 Reducer Master | Implemented useReducer | ✅ Session 4 |
 | 🎯 DOM Controller | Used useRef | ✅ Session 4 |
 | ✅ Validator | Added Zod validation | ✅ Session 4 |
-| 🏁 Phase 2 Complete | Finished intermediate level | ✅ Session 4 |
+| 🏁 Phase 2 Complete | Finished intermediate | ✅ Session 4 |
+| 🌐 API Master | Connected to backend | ✅ Session 5 |
 
 ---
 
@@ -216,7 +219,7 @@ erp-inventory-manager/
 | Components & JSX | ⭐⭐⭐⭐⭐ | Mastered |
 | Props | ⭐⭐⭐⭐⭐ | Mastered |
 | useState | ⭐⭐⭐⭐⭐ | Mastered |
-| useEffect | ⭐⭐⭐⭐ | Strong |
+| useEffect | ⭐⭐⭐⭐⭐ | Mastered |
 | useContext | ⭐⭐⭐⭐ | Strong |
 | useReducer | ⭐⭐⭐⭐ | Strong |
 | useRef | ⭐⭐⭐⭐ | Strong |
@@ -225,36 +228,39 @@ erp-inventory-manager/
 | Zod Validation | ⭐⭐⭐ | Good |
 | TypeScript | ⭐⭐⭐ | Good |
 | Tailwind CSS | ⭐⭐⭐ | Good |
+| API Integration | ⭐⭐⭐⭐ | Strong ✨ NEW |
+| Loading/Error States | ⭐⭐⭐⭐ | Strong ✨ NEW |
 
 ---
 
-## 🎯 Next Session Plan (Session 5)
+## 🎯 Next Session Plan (Session 6)
 
-### Phase 3: Advanced
-1. **API Integration**
-   - Fetch data from backend
-   - POST/PUT/DELETE requests
-   - Loading states
-   - Error handling
-
-2. **React Query**
+### React Query (TanStack Query)
+1. **Why React Query?**
    - Automatic caching
    - Background refetching
-   - Optimistic updates
-
-3. **Zustand** (Optional)
-   - Simpler than Context
+   - Built-in loading/error states
    - Less boilerplate
+
+2. **What We'll Learn:**
+   - `useQuery` for GET requests
+   - `useMutation` for POST/PUT/DELETE
+   - Query invalidation
+   - Optimistic updates
 
 ---
 
 ## 💪 Motivation
 
-> "You've completed 50% of the learning journey in just 7.5 hours!
-> Phase 1 & 2 are DONE. You understand React patterns that many
-> developers struggle with. Next up: connecting to real APIs!"
+> "You've connected React to a real API! Your app now has:
+> - Real data from FastAPI backend
+> - Professional loading states
+> - Proper error handling
+> - Full CRUD operations
+> 
+> You're building like a professional React developer! 🚀"
 
-**Keep going! You're doing amazing! 🚀**
+**Keep going! Phase 3 is 40% complete!**
 
 ---
 
@@ -264,5 +270,6 @@ erp-inventory-manager/
 - [Session 2 Notes](./SESSION_2.md) - Router & Context
 - [Session 3 Notes](./SESSION_3.md) - Custom Hooks
 - [Session 4 Notes](./SESSION_4.md) - useReducer, useRef, Zod
+- [Session 5 Notes](./SESSION_5.md) - API Integration ✨ NEW
 - [Concepts Reference](./CONCEPTS.md)
 - [Fundamentals Summary](./FUNDAMENTALS_SUMMARY.md)
