@@ -19,6 +19,12 @@ import CustomerDetailPage from './pages/Customer/CustomerDetailPage'
 import AddCustomerPage from './pages/Customer/AddCustomerPage'
 import EditCustomerPage from './pages/Customer/EditCustomerPage'
 
+// Pages - Users
+import UsersPage from './pages/User/UsersPage'
+import UserDetailPage from './pages/User/UserDetailPage'
+import AddUserPage from './pages/User/AddUserPage'
+import EditUserPage from './pages/User/EditUserPage'
+
 // Pages - Cart (useReducer demo!)
 import CartPage from './pages/CartPage'
 
@@ -27,12 +33,6 @@ import UseEffectPractice from './pages/practice/UseEffectPractice'
 import UseStatePractice from './pages/practice/UseStatePractice'
 import UseTogglePractice from './pages/practice/UseTogglePractice'
 import UseRefPractice from './pages/practice/UseRefPractice'
-
-// Pages - Customers
-import UsersPage from './pages/User/UsersPage'
-//import CustomerDetailPage from './pages/Customer/CustomerDetailPage'
-//import AddCustomerPage from './pages/Customer/AddCustomerPage'
-//import EditCustomerPage from './pages/Customer/EditCustomerPage'
 
 function App() {
   return (
@@ -54,6 +54,12 @@ function App() {
             <Route path="/customers/:id" element={<CustomerDetailPage />} />
             <Route path="/customers/edit/:id" element={<EditCustomerPage />} />
 
+            {/* User Routes */}
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/users/new" element={<AddUserPage />} />
+            <Route path="/users/:id" element={<UserDetailPage />} />
+            <Route path="/users/edit/:id" element={<EditUserPage />} />
+
             {/* Cart Route (useReducer demo!) */}
             <Route path="/cart" element={<CartPage />} />
 
@@ -62,12 +68,6 @@ function App() {
             <Route path="/practice/useeffect" element={<UseEffectPractice />} />
             <Route path="/practice/usetoggle" element={<UseTogglePractice />} />
             <Route path="/practice/useref" element={<UseRefPractice />} />
-
-            {/* User Routes */}
-            <Route path="/users" element={<UsersPage />} />
-           {/* <Route path="/csers/new" element={<AddUserPage />} />
-            <Route path="/csers/:id" element={<UserDetailPage />} />
-            <Route path="/csers/edit/:id" element={<EditUserPage />} />*/}
           </Routes>
         </Layout>
       </BrowserRouter>

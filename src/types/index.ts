@@ -5,16 +5,13 @@
 export type Product = {
   id: number
   name: string
-  description?: string    // Optional - matches backend
+  description?: string
   price: number
-  stock: number           // Changed from 'quantity' to match backend
-  category?: string       // Optional - matches backend
+  stock: number
+  category?: string
 }
 
-// For creating new products (no id yet)
 export type ProductCreate = Omit<Product, 'id'>
-
-// For updating products (all fields optional)
 export type ProductUpdate = Partial<ProductCreate>
 
 // ============================================
@@ -24,36 +21,40 @@ export type ProductUpdate = Partial<ProductCreate>
 export type Customer = {
   id: number
   name: string
-  email: string           // Required in backend
-  phone?: string          // Optional
-  address?: string        // Optional
-  company?: string        // Optional
+  email: string
+  phone?: string
+  address?: string
+  company?: string
 }
 
-// For creating new customers
 export type CustomerCreate = Omit<Customer, 'id'>
-
-// For updating customers (all fields optional)
 export type CustomerUpdate = Partial<CustomerCreate>
 
-
 // ============================================
-// CUSTOMER TYPES - Aligned with FastAPI backend
+// USER TYPES - Aligned with FastAPI backend
 // ============================================
 
 export type User = {
   id: number
   username: string
-  email: string           // Required in backend
-  password_hash?: string          // Optional
-  full_name?: string        // Optional
-  is_active?: number        // Optional
-  role?: string        // Optional
-  created_at?: string        // Optional
+  email: string
+  full_name?: string
+  is_active: boolean      // ✅ Fixed: boolean not number
+  role: string
+  created_at: string      // ISO date string
+  // Note: password_hash is NEVER returned from API (security)
 }
 
-// For creating new customers
-export type UserCreate = Omit<User, 'id'>
+// For creating new users (password required)
+export type UserCreate = {
+  username: string
+  email: string
+  password: string        // Plain password, backend hashes it
+  full_name?: string
+  role?: string
+}
 
-// For updating customers (all fields optional)
-export type UserUpdate = Partial<UserCreate>
+// For updating users (all fields optional)
+export type UserUpdate = Partial<UserCreate> & {
+  is_active?: boolean
+}

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
 import { useProducts } from '../context/ProductContext'
 import { useCustomers } from '../context/CustomerContext'
+import { useUsers } from '../context/UserContext'
 
 function Dashboard() {
   const { products, loading: productsLoading, error: productsError } = useProducts()
   const { customers, loading: customersLoading, error: customersError } = useCustomers()
+  const { users, loading: usersLoading, error: usersError } = useUsers()
 
-  const loading = productsLoading || customersLoading
-  const error = productsError || customersError
+  const loading = productsLoading || customersLoading || usersLoading
+  const error = productsError || customersError || usersError
 
   // Loading state
   if (loading) {
@@ -40,6 +42,8 @@ function Dashboard() {
   // Calculate stats
   const totalProducts = products.length
   const totalCustomers = customers.length
+  const totalUsers = users.length
+  const activeUsers = users.filter(u => u.is_active).length
   const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0)
   const lowStockCount = products.filter(p => p.stock < 50).length
 
@@ -53,7 +57,8 @@ function Dashboard() {
         Connected to API (localhost:8000)
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="text-gray-500 text-sm">Total Products</div>
           <div className="text-3xl font-bold text-blue-600">{totalProducts}</div>
@@ -65,7 +70,13 @@ function Dashboard() {
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="text-gray-500 text-sm">Total Inventory Value</div>
+          <div className="text-gray-500 text-sm">Total Users</div>
+          <div className="text-3xl font-bold text-indigo-600">{totalUsers}</div>
+          <div className="text-xs text-gray-400 mt-1">{activeUsers} active</div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <div className="text-gray-500 text-sm">Inventory Value</div>
           <div className="text-3xl font-bold text-green-600">${totalValue.toFixed(2)}</div>
         </div>
 
@@ -75,7 +86,8 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Quick Actions Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Products Quick Actions */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Products</h2>
@@ -97,6 +109,19 @@ function Dashboard() {
               View All
             </Link>
             <Link to="/customers/new" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+              Add New
+            </Link>
+          </div>
+        </div>
+
+        {/* Users Quick Actions */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Users</h2>
+          <div className="flex gap-4">
+            <Link to="/users" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+              View All
+            </Link>
+            <Link to="/users/new" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
               Add New
             </Link>
           </div>
