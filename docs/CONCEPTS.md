@@ -1,140 +1,160 @@
-# React Concepts - Quick Reference
+# Full-Stack Concepts - Quick Reference
+
+---
+
+# Part 1: React Frontend
 
 ## Java ↔ React Comparison
 
 | Java/Swing | React | Notes |
 |------------|-------|-------|
-| JPanel class | Function Component | Both are reusable UI units |
-| Constructor params | Props | Data passed from parent |
-| Class fields | useState | Mutable component data |
-| PropertyChangeListener | useState setter | Triggers UI update |
-| componentDidMount | useEffect(() => {}, []) | Runs once on mount |
-| componentDidUpdate | useEffect(() => {}, [deps]) | Runs when deps change |
+| JPanel class | Function Component | Reusable UI units |
+| Constructor params | Props | Data from parent |
+| Class fields | useState | Mutable state |
+| PropertyChangeListener | useState setter | Triggers re-render |
+| componentDidMount | useEffect(() => {}, []) | Runs on mount |
 | ActionListener | onClick, onChange | Event handlers |
 | for loop + add() | .map() + JSX | Rendering lists |
-| if/else for visibility | Conditional rendering | `{show && <Component />}` |
 | Servlet URL mapping | React Router | URL → Component |
-| Command Pattern | useReducer | Action-based state changes |
+| Command Pattern | useReducer | Action-based state |
 | Component reference | useRef | DOM access |
 | Bean Validation | Zod | Form validation |
+| HttpClient | fetch() | API calls |
 
 ---
 
 ## Hook Rules 📜
 
-1. **Only call hooks at top level**
-   ```tsx
-   // ❌ WRONG
-   if (condition) {
-     const [state, setState] = useState()
-   }
-   
-   // ✅ CORRECT
-   const [state, setState] = useState()
-   if (condition) { /* use state */ }
-   ```
-
-2. **Only call hooks in React functions**
-   ```tsx
-   // ❌ WRONG - regular function
-   function helper() {
-     const [state, setState] = useState()
-   }
-   
-   // ✅ CORRECT - React component
-   function MyComponent() {
-     const [state, setState] = useState()
-   }
-   ```
+1. **Only call hooks at top level** - Never in conditions/loops
+2. **Only call hooks in React functions** - Components or custom hooks
 
 ---
 
 ## useState Patterns
 
-### Basic
 ```tsx
+// Basic
 const [count, setCount] = useState(0)
-setCount(5)           // Set to 5
-setCount(c => c + 1)  // Increment (use prev value)
-```
+setCount(5)
+setCount(c => c + 1)
 
-### With Object
-```tsx
+// Object
 const [user, setUser] = useState({ name: '', age: 0 })
-setUser({ ...user, name: 'John' })  // Spread to keep other fields
-```
+setUser({ ...user, name: 'John' })
 
-### With Array
-```tsx
+// Array
 const [items, setItems] = useState([])
-setItems([...items, newItem])       // Add item
-setItems(items.filter(i => i.id !== id))  // Remove item
-```
-
-### Lazy Initial State
-```tsx
-// For expensive computation or localStorage
-const [data, setData] = useState(() => {
-  return JSON.parse(localStorage.getItem('data'))
-})
+setItems([...items, newItem])
+setItems(items.filter(i => i.id !== id))
 ```
 
 ---
 
 ## useEffect Patterns
 
-### Run Once (on mount)
 ```tsx
+// Run once on mount
 useEffect(() => {
-  console.log('Component mounted')
-}, [])  // Empty array = only on mount
-```
+  fetchData()
+}, [])
 
-### Run on Dependency Change
-```tsx
+// Run on dependency change
 useEffect(() => {
-  console.log('products changed')
-}, [products])  // Runs when products changes
-```
+  console.log('value changed')
+}, [value])
 
-### Cleanup
-```tsx
+// Cleanup
 useEffect(() => {
   const timer = setInterval(() => {}, 1000)
-  return () => clearInterval(timer)  // Cleanup
+  return () => clearInterval(timer)
 }, [])
 ```
 
 ---
 
-## useReducer Patterns ✨ NEW
+## API Integration Patterns ✨
 
-### When to Use
-- Multiple related state values
-- Complex state logic
-- Many actions on same state
-
-### Basic Pattern
+### Basic Fetch
 ```tsx
-// 1. Define state type
-interface State {
-  items: Item[]
-  total: number
-}
+const [data, setData] = useState([])
+const [loading, setLoading] = useState(true)
+const [error, setError] = useState(null)
 
-// 2. Define actions
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('http://localhost:8000/api/products')
+      const json = await response.json()
+      setData(json)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+  fetchData()
+}, [])
+```
+
+### POST Request
+```tsx
+const createProduct = async (product) => {
+  const response = await fetch('http://localhost:8000/api/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(product)
+  })
+  return response.json()
+}
+```
+
+### API Service Pattern
+```tsx
+// services/api.ts
+export const productApi = {
+  getAll: () => fetchApi<Product[]>('/products'),
+  getById: (id) => fetchApi<Product>(`/products/${id}`),
+  create: (data) => fetchApi<Product>('/products', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => fetchApi<Product>(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => fetchApi<void>(`/products/${id}`, { method: 'DELETE' }),
+}
+```
+
+---
+
+## Loading & Error States
+
+```tsx
+function ProductsPage() {
+  const { products, loading, error } = useProducts()
+
+  if (loading) {
+    return <div className="animate-spin">Loading...</div>
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>
+  }
+
+  return <div>{products.map(p => ...)}</div>
+}
+```
+
+---
+
+## useReducer Pattern
+
+```tsx
 type Action =
   | { type: 'ADD_ITEM'; payload: Item }
   | { type: 'REMOVE_ITEM'; payload: { id: number } }
   | { type: 'CLEAR' }
 
-// 3. Create reducer
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'ADD_ITEM':
       return { ...state, items: [...state.items, action.payload] }
-    case 'REMOVE_ITEM':
-      return { ...state, items: state.items.filter(i => i.id !== action.payload.id) }
     case 'CLEAR':
       return { items: [], total: 0 }
     default:
@@ -142,322 +162,238 @@ function reducer(state: State, action: Action): State {
   }
 }
 
-// 4. Use in component
 const [state, dispatch] = useReducer(reducer, initialState)
 dispatch({ type: 'ADD_ITEM', payload: newItem })
 ```
 
-### useState vs useReducer
-```tsx
-// useState - Simple, direct
-setCount(count + 1)
-
-// useReducer - Action-based
-dispatch({ type: 'INCREMENT' })
-```
-
 ---
 
-## useRef Patterns ✨ NEW
+## useRef Pattern
 
-### DOM Reference
 ```tsx
+// DOM Reference
 const inputRef = useRef<HTMLInputElement>(null)
-
-// Attach to element
 <input ref={inputRef} />
-
-// Access DOM
 inputRef.current?.focus()
-inputRef.current?.select()
-```
 
-### Persist Value (no re-render)
-```tsx
+// Persist value (no re-render)
 const renderCount = useRef(0)
-renderCount.current += 1  // Doesn't cause re-render!
-
-const prevValue = useRef(value)
-useEffect(() => {
-  prevValue.current = value  // Store previous
-}, [value])
+renderCount.current += 1
 ```
-
-### Timer Reference
-```tsx
-const intervalRef = useRef<number | null>(null)
-
-const start = () => {
-  intervalRef.current = setInterval(() => {}, 1000)
-}
-
-const stop = () => {
-  if (intervalRef.current) clearInterval(intervalRef.current)
-}
-```
-
-### useRef vs useState
-| useRef | useState |
-|--------|----------|
-| No re-render on change | Triggers re-render |
-| `.current` to access | Direct access |
-| For DOM / persist value | For UI state |
 
 ---
 
-## Zod Validation Patterns ✨ NEW
+## Zod Validation
 
-### Basic Schema
 ```tsx
 import { z } from 'zod'
 
 const schema = z.object({
   name: z.string().min(1, 'Required').max(100),
   email: z.string().email('Invalid email'),
-  age: z.number().min(0).max(120),
+  price: z.string().refine(v => Number(v) > 0, 'Must be positive'),
 })
-```
 
-### String Validation
-```tsx
-z.string()
-  .min(1, 'Required')
-  .min(2, 'Too short')
-  .max(100, 'Too long')
-  .email('Invalid email')
-  .regex(/pattern/, 'Invalid format')
-```
-
-### Number from String (forms)
-```tsx
-z.string()
-  .min(1, 'Required')
-  .refine(v => !isNaN(Number(v)), 'Must be number')
-  .refine(v => Number(v) > 0, 'Must be positive')
-```
-
-### Validate Data
-```tsx
-// Throws error if invalid
-schema.parse(data)
-
-// Returns { success, data, error }
 const result = schema.safeParse(data)
 if (result.success) {
   console.log(result.data)
-} else {
-  console.log(result.error.errors)
-}
-```
-
-### TypeScript Type from Schema
-```tsx
-type FormData = z.infer<typeof schema>
-// Creates: { name: string, email: string, age: number }
-```
-
----
-
-## Props Patterns
-
-### Basic Props
-```tsx
-interface Props {
-  name: string
-  price: number
-  onDelete: (id: number) => void
-}
-
-function Product({ name, price, onDelete }: Props) {
-  return <div onClick={() => onDelete(1)}>{name}</div>
-}
-```
-
-### Optional Props
-```tsx
-interface Props {
-  name: string
-  description?: string  // Optional with ?
-}
-```
-
-### Children Props
-```tsx
-interface Props {
-  children: React.ReactNode
-}
-
-function Card({ children }: Props) {
-  return <div className="card">{children}</div>
 }
 ```
 
 ---
 
-## Event Handling
+# Part 2: FastAPI Backend
 
-### Click
-```tsx
-<button onClick={() => handleClick(id)}>Click</button>
-```
+## Java ↔ Python Comparison
 
-### Input Change
-```tsx
-<input 
-  value={name} 
-  onChange={(e) => setName(e.target.value)} 
-/>
-```
-
-### Form Submit
-```tsx
-<form onSubmit={(e) => {
-  e.preventDefault()  // Prevent page reload
-  handleSubmit()
-}}>
-```
-
-### Blur (for validation)
-```tsx
-<input onBlur={(e) => validateField(e.target.name)} />
-```
+| Java/Spring | Python/FastAPI | Notes |
+|-------------|----------------|-------|
+| `@RestController` | `APIRouter` | Group endpoints |
+| `@GetMapping` | `@router.get()` | HTTP GET |
+| `@PostMapping` | `@router.post()` | HTTP POST |
+| `@PathVariable` | Path parameter | `/products/{id}` |
+| `@RequestBody` | Pydantic model | Auto-validated |
+| `@Valid` | Automatic | Pydantic validates |
+| `throw Exception` | `raise HTTPException` | Error handling |
 
 ---
 
-## Conditional Rendering
+## Database: Java ↔ Python
 
-### && Operator
-```tsx
-{isLoading && <Spinner />}
+| Java/Spring | Python/FastAPI | Notes |
+|-------------|----------------|-------|
+| H2 Database | SQLite | Embedded DB |
+| Hibernate/JPA | SQLAlchemy | ORM |
+| `@Entity` | `class Model(Base)` | DB table |
+| `@Id @GeneratedValue` | `Column(primary_key=True)` | Auto ID |
+| `JpaRepository` | `db.query()` | DB operations |
+| `@Autowired` | `Depends(get_db)` | Inject session |
+| `@Transactional` | `db.commit()` | Save changes |
+
+---
+
+## SQLAlchemy Model
+
+```python
+class ProductModel(Base):
+    __tablename__ = "products"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False)
+    price = Column(Float, nullable=False)
+    stock = Column(Integer, default=0)
 ```
 
-### Ternary
-```tsx
-{isLoggedIn ? <Dashboard /> : <Login />}
-```
-
-### Early Return
-```tsx
-function Component({ data }) {
-  if (!data) return <div>No data</div>
-  return <div>{data.name}</div>
+**Java Equivalent:**
+```java
+@Entity
+@Table(name = "products")
+public class Product {
+    @Id @GeneratedValue
+    private Long id;
+    
+    @Column(nullable = false)
+    private String name;
+    
+    private Double price;
+    private Integer stock = 0;
 }
 ```
 
 ---
 
-## List Rendering
+## Repository Pattern
 
-### Basic
-```tsx
-{items.map(item => (
-  <Item key={item.id} {...item} />
-))}
-```
+```python
+@router.get("/products")
+def get_all(db: Session = Depends(get_db)):
+    return db.query(ProductModel).all()
 
-### With Index (only if no unique id)
-```tsx
-{items.map((item, index) => (
-  <Item key={index} {...item} />
-))}
-```
-
----
-
-## TypeScript Tips
-
-### Interface for Props
-```tsx
-interface ProductProps {
-  id: number
-  name: string
-  price: number
-}
-```
-
-### Type for Arrays
-```tsx
-const [products, setProducts] = useState<Product[]>([])
-```
-
-### Event Types
-```tsx
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  setName(e.target.value)
-}
-```
-
-### Ref Types
-```tsx
-const inputRef = useRef<HTMLInputElement>(null)
-const divRef = useRef<HTMLDivElement>(null)
+@router.post("/products")
+def create(product: ProductCreate, db: Session = Depends(get_db)):
+    db_product = ProductModel(**product.model_dump())
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
 ```
 
 ---
 
-## Built-in vs External
+## Password Hashing
 
-### React Built-in Hooks
-```tsx
-import { useState, useEffect, useContext, useReducer, useRef } from 'react'
+```python
+import hashlib
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+# Create user with hashed password
+db_user = UserModel(
+    username=user.username,
+    password_hash=hash_password(user.password)
+)
 ```
 
-### External Libraries
-```tsx
-// Routing
-import { useParams, useNavigate } from 'react-router-dom'
+---
 
-// Validation
-import { z } from 'zod'
+## Pydantic Validation
 
-// Future: Data fetching
-import { useQuery } from '@tanstack/react-query'
+```python
+class ProductCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    price: float = Field(..., gt=0)
+    stock: int = Field(..., ge=0)
 ```
+
+---
+
+# Part 3: Full-Stack Flow
+
+## Data Flow Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  React Component                                            │
+│  const { data } = await fetch('/api/products')              │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ HTTP Request
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  FastAPI Router                                             │
+│  @router.get("/products")                                   │
+│  def get_products(db: Session = Depends(get_db)):          │
+└─────────────────────────┬───────────────────────────────────┘
+                          │ SQLAlchemy Query
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  SQLite Database                                            │
+│  SELECT * FROM products                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Module Structure Pattern
+
+### Backend (FastAPI)
+```
+models/
+├── user.py          # Pydantic schema (API validation)
+└── user_model.py    # SQLAlchemy model (database)
+
+routers/
+└── users.py         # CRUD endpoints
+```
+
+### Frontend (React)
+```
+types/
+└── index.ts         # TypeScript types
+
+services/
+└── api.ts           # API calls
+
+context/
+└── UserContext.tsx  # State management
+
+pages/User/
+├── UsersPage.tsx    # List
+├── UserDetailPage.tsx
+├── AddUserPage.tsx
+└── EditUserPage.tsx
+
+components/user/
+└── UserCard.tsx     # Card component
+```
+
+---
+
+## Quick Reference URLs
+
+| Service | URL |
+|---------|-----|
+| React Frontend | http://localhost:5173 |
+| FastAPI Backend | http://localhost:8000 |
+| API Docs (Swagger) | http://localhost:8000/api/docs |
+| Database File | `data/erp.db` |
 
 ---
 
 ## Common Mistakes ❌
 
+### React
 | Mistake | Fix |
 |---------|-----|
 | `class="..."` | `className="..."` |
 | Forgetting key | `key={item.id}` |
-| Mutating state directly | Use setter with spread |
-| Missing dependency in useEffect | Add to dependency array |
-| Infinite loop in useEffect | Check dependencies |
-| Mutating ref and expecting re-render | Use useState for UI updates |
-| Calling hooks conditionally | Always call at top level |
+| Mutating state | Use setter with spread |
+| Not handling loading | Add loading state |
 
----
-
-## Tailwind Quick Reference
-
-### Spacing
-- `p-4` = padding 1rem
-- `m-4` = margin 1rem
-- `px-4` = padding-left/right
-- `py-4` = padding-top/bottom
-- `gap-4` = gap between flex/grid items
-
-### Flexbox
-- `flex` = display: flex
-- `justify-center` = justify-content: center
-- `items-center` = align-items: center
-- `flex-col` = flex-direction: column
-
-### Grid
-- `grid` = display: grid
-- `grid-cols-3` = 3 columns
-- `md:grid-cols-2` = 2 columns on medium screens
-
-### Colors
-- `bg-blue-500` = background blue
-- `text-white` = white text
-- `hover:bg-blue-600` = darker on hover
-- `border-red-500` = red border (validation error)
-
-### Responsive
-- `sm:` = 640px+
-- `md:` = 768px+
-- `lg:` = 1024px+
-- `xl:` = 1280px+
+### FastAPI
+| Mistake | Fix |
+|---------|-----|
+| Forgetting `db.commit()` | Always commit |
+| Not refreshing after insert | `db.refresh(item)` |
+| Wrong status code | Use `status.HTTP_201_CREATED` |
+| Missing CORS | Add CORSMiddleware |

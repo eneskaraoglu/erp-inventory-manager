@@ -5,10 +5,10 @@
 ```
 Phase 1: Fundamentals    [██████████] 100% ✅
 Phase 2: Intermediate    [██████████] 100% ✅
-Phase 3: Advanced        [████░░░░░░] 40%
+Phase 3: Advanced        [██████░░░░] 60%
 Phase 4: Professional    [░░░░░░░░░░] 0%
 ─────────────────────────────────────────
-Total Progress:          [███████░░░] 60%
+Total Progress:          [███████░░░] 65%
 ```
 
 ---
@@ -21,10 +21,10 @@ Total Progress:          [███████░░░] 60%
 | 2 | Jan 4, 2026 | ~2 hrs | React Router, useContext | ✅ |
 | 3 | Jan 7, 2026 | ~1.5 hrs | Custom Hooks, useForm, useLocalStorage | ✅ |
 | 4 | Jan 10, 2026 | ~2 hrs | useReducer, useRef, Zod Validation | ✅ |
-| 5 | Jan 11, 2026 | ~2 hrs | API Integration, Loading/Error States | ✅ |
+| 5 | Jan 11, 2026 | ~2.5 hrs | API Integration, SQLite, User Module | ✅ |
 | 6 | TBD | TBD | React Query | 📋 Planned |
 
-**Total Time Invested: ~9.5 hours**
+**Total Time Invested: ~10 hours**
 
 ---
 
@@ -55,6 +55,7 @@ Total Progress:          [███████░░░] 60%
 ### Phase 3 - Advanced (In Progress!)
 - [x] API Integration (fetch) ✅ Session 5
 - [x] Loading & Error states ✅ Session 5
+- [x] SQLite Database ✅ Session 5
 - [ ] React Query
 - [ ] Zustand state management
 - [ ] Error boundaries
@@ -82,9 +83,21 @@ Total Progress:          [███████░░░] 60%
 ### Customers Module ✅
 - [x] List all customers (from API!)
 - [x] View customer detail
-- [x] Add new customer (POST to API!)
-- [x] Edit customer (PUT to API!)
-- [x] Delete customer (DELETE to API!)
+- [x] Add new customer
+- [x] Edit customer
+- [x] Delete customer
+- [x] Search/filter
+- [x] Loading states
+- [x] Error handling
+
+### Users Module ✅ NEW (Session 5 - Self-Built!)
+- [x] List all users (from API!)
+- [x] View user detail
+- [x] Add new user (with password)
+- [x] Edit user
+- [x] Delete user
+- [x] Role-based badges (admin/manager/user)
+- [x] Active/Inactive status
 - [x] Search/filter
 - [x] Loading states
 - [x] Error handling
@@ -103,6 +116,12 @@ Total Progress:          [███████░░░] 60%
 - [x] Loading spinners
 - [x] Error messages with retry
 - [x] CORS configured
+
+### Backend Database ✅ NEW (Session 5)
+- [x] SQLite persistent storage
+- [x] SQLAlchemy ORM
+- [x] Password hashing
+- [x] Seed data
 
 ---
 
@@ -124,22 +143,24 @@ erp-inventory-manager/
 │   │   ├── layout/
 │   │   │   └── Layout.tsx
 │   │   ├── ProductCard.tsx
-│   │   ├── AddProductForm.tsx
-│   │   └── customer/
-│   │       └── CustomerCard.tsx
+│   │   ├── customer/
+│   │   │   └── CustomerCard.tsx
+│   │   └── user/              ✅ NEW
+│   │       └── UserCard.tsx
 │   ├── context/
 │   │   ├── AppProviders.tsx
-│   │   ├── ProductContext.tsx  (API integrated!)
-│   │   ├── CustomerContext.tsx (API integrated!)
-│   │   └── CartContext.tsx
+│   │   ├── ProductContext.tsx
+│   │   ├── CustomerContext.tsx
+│   │   ├── CartContext.tsx
+│   │   └── UserContext.tsx    ✅ NEW
 │   ├── hooks/
 │   │   ├── index.ts
 │   │   ├── useLocalStorage.ts
 │   │   ├── useForm.ts
 │   │   └── useFormWithValidation.ts
-│   ├── services/              ✅ NEW FOLDER
+│   ├── services/              ✅ NEW
 │   │   ├── index.ts
-│   │   └── api.ts             (Product & Customer API)
+│   │   └── api.ts
 │   ├── reducers/
 │   │   ├── index.ts
 │   │   └── cartReducer.ts
@@ -147,11 +168,11 @@ erp-inventory-manager/
 │   │   ├── index.ts
 │   │   └── schemas.ts
 │   ├── types/
-│   │   ├── index.ts           (aligned with backend!)
+│   │   ├── index.ts
 │   │   └── cart.ts
 │   ├── pages/
-│   │   ├── Dashboard.tsx      (with loading/error)
-│   │   ├── ProductsPage.tsx   (with loading/error)
+│   │   ├── Dashboard.tsx
+│   │   ├── ProductsPage.tsx
 │   │   ├── ProductDetailPage.tsx
 │   │   ├── AddProductPage.tsx
 │   │   ├── EditProductPage.tsx
@@ -161,38 +182,71 @@ erp-inventory-manager/
 │   │   │   ├── CustomerDetailPage.tsx
 │   │   │   ├── AddCustomerPage.tsx
 │   │   │   └── EditCustomerPage.tsx
+│   │   ├── User/              ✅ NEW
+│   │   │   ├── UsersPage.tsx
+│   │   │   ├── UserDetailPage.tsx
+│   │   │   ├── AddUserPage.tsx
+│   │   │   └── EditUserPage.tsx
 │   │   └── practice/
 │   │       └── ...
 │   └── App.tsx
 └── package.json
+
+erp-inventory-manager-backend/
+├── app/
+│   ├── database.py            ✅ NEW
+│   ├── main.py
+│   ├── models/
+│   │   ├── product.py
+│   │   ├── product_model.py
+│   │   ├── customer.py
+│   │   ├── customer_model.py
+│   │   ├── user.py            ✅ NEW
+│   │   └── user_model.py      ✅ NEW
+│   └── routers/
+│       ├── products.py
+│       ├── customers.py
+│       └── users.py           ✅ NEW
+├── data/
+│   └── erp.db                 ✅ NEW (SQLite)
+└── requirements.txt
 ```
 
 ---
 
-## 🎓 React Hooks Knowledge
+## 🎓 Knowledge Summary
 
-### Built-in Hooks Learned
+### React Hooks
 | Hook | Session | Purpose |
 |------|---------|---------|
 | useState | 1 | Local state |
 | useEffect | 1 | Side effects |
 | useContext | 2 | Access context |
 | useReducer | 4 | Complex state |
-| useRef | 4 | DOM access / persist value |
+| useRef | 4 | DOM access |
 
-### Library Hooks Used
-| Hook | Library | Purpose |
-|------|---------|---------|
-| useParams | react-router-dom | URL parameters |
-| useNavigate | react-router-dom | Programmatic navigation |
-| useLocation | react-router-dom | Current URL |
-
-### Custom Hooks Created
+### Custom Hooks
 | Hook | Session | Purpose |
 |------|---------|---------|
-| useLocalStorage | 3 | Persist state in localStorage |
-| useForm | 3 | Form state management |
-| useFormWithValidation | 4 | Form + Zod validation |
+| useLocalStorage | 3 | Persist state |
+| useForm | 3 | Form state |
+| useFormWithValidation | 4 | Form + Zod |
+
+### API Patterns
+| Pattern | Session | Purpose |
+|---------|---------|---------|
+| fetch() | 5 | HTTP requests |
+| async/await | 5 | Promise handling |
+| Loading state | 5 | UX feedback |
+| Error state | 5 | Error handling |
+
+### Backend Patterns
+| Pattern | Session | Purpose |
+|---------|---------|---------|
+| SQLAlchemy | 5 | ORM |
+| SQLite | 5 | Database |
+| Pydantic | 5 | Validation |
+| Password hash | 5 | Security |
 
 ---
 
@@ -209,6 +263,8 @@ erp-inventory-manager/
 | ✅ Validator | Added Zod validation | ✅ Session 4 |
 | 🏁 Phase 2 Complete | Finished intermediate | ✅ Session 4 |
 | 🌐 API Master | Connected to backend | ✅ Session 5 |
+| 💾 Database Pro | Added SQLite | ✅ Session 5 |
+| 👤 User Builder | Built User module | ✅ Session 5 |
 
 ---
 
@@ -225,11 +281,13 @@ erp-inventory-manager/
 | useRef | ⭐⭐⭐⭐ | Strong |
 | Custom Hooks | ⭐⭐⭐⭐ | Strong |
 | React Router | ⭐⭐⭐⭐ | Strong |
-| Zod Validation | ⭐⭐⭐ | Good |
+| Zod Validation | ⭐⭐⭐⭐ | Strong |
 | TypeScript | ⭐⭐⭐ | Good |
 | Tailwind CSS | ⭐⭐⭐ | Good |
-| API Integration | ⭐⭐⭐⭐ | Strong ✨ NEW |
-| Loading/Error States | ⭐⭐⭐⭐ | Strong ✨ NEW |
+| API Integration | ⭐⭐⭐⭐ | Strong ✨ |
+| Loading/Error | ⭐⭐⭐⭐ | Strong ✨ |
+| SQLAlchemy | ⭐⭐⭐ | Good ✨ |
+| FastAPI | ⭐⭐⭐⭐ | Strong ✨ |
 
 ---
 
@@ -250,17 +308,16 @@ erp-inventory-manager/
 
 ---
 
-## 💪 Motivation
+## 💪 Session 5 Highlight
 
-> "You've connected React to a real API! Your app now has:
-> - Real data from FastAPI backend
-> - Professional loading states
-> - Proper error handling
-> - Full CRUD operations
+> **You built the entire User module yourself!**
 > 
-> You're building like a professional React developer! 🚀"
+> - Backend: Model, Schema, Router, Database
+> - Frontend: Context, API, Pages, Components
+> 
+> This shows you've mastered the patterns and can apply them independently!
 
-**Keep going! Phase 3 is 40% complete!**
+**You're 65% through the learning journey!** 🚀
 
 ---
 
@@ -270,6 +327,6 @@ erp-inventory-manager/
 - [Session 2 Notes](./SESSION_2.md) - Router & Context
 - [Session 3 Notes](./SESSION_3.md) - Custom Hooks
 - [Session 4 Notes](./SESSION_4.md) - useReducer, useRef, Zod
-- [Session 5 Notes](./SESSION_5.md) - API Integration ✨ NEW
+- [Session 5 Notes](./SESSION_5.md) - API, SQLite, Users ✨ NEW
 - [Concepts Reference](./CONCEPTS.md)
 - [Fundamentals Summary](./FUNDAMENTALS_SUMMARY.md)

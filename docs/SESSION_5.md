@@ -1,6 +1,6 @@
-# Session 5 - API Integration
+# Session 5 - API Integration & User Module
 **Date:** January 11, 2026  
-**Duration:** ~2 hours  
+**Duration:** ~2.5 hours  
 **Phase:** 3 - Advanced (Started!)
 
 ---
@@ -12,6 +12,8 @@
 - [x] Add loading & error states
 - [x] Update types to match backend
 - [x] Full CRUD operations via API
+- [x] Add SQLite database to backend
+- [x] Build complete User module (self-practice!)
 
 ---
 
@@ -34,7 +36,16 @@
 | `loading: false` | Data ready | Show content |
 | `error: string` | Something failed | Show error message + retry |
 
-### 3. Async Context Actions
+### 3. SQLite Database (Backend)
+
+| Concept | Python/FastAPI | Java Equivalent |
+|---------|----------------|-----------------|
+| Database | SQLite | H2 Database |
+| ORM | SQLAlchemy | Hibernate/JPA |
+| Model | `class Model(Base)` | `@Entity` |
+| Session | `Depends(get_db)` | `@Autowired EntityManager` |
+
+### 4. Async Context Actions
 
 ```tsx
 // BEFORE (Session 4): Synchronous
@@ -44,14 +55,8 @@ const addProduct = (product) => {
 
 // AFTER (Session 5): Async with API
 const addProduct = async (product) => {
-  try {
-    setError(null)
-    const newProduct = await productApi.create(product)
-    setProducts([...products, newProduct])
-  } catch (err) {
-    setError(err.message)
-    throw err  // Re-throw for component to handle
-  }
+  const newProduct = await productApi.create(product)
+  setProducts([...products, newProduct])
 }
 ```
 
@@ -59,76 +64,123 @@ const addProduct = async (product) => {
 
 ## 🛠️ Features Built
 
+### API Integration ✅
 | Feature | Status | Description |
 |---------|--------|-------------|
 | API Service | ✅ | `src/services/api.ts` |
 | Product API | ✅ | CRUD operations |
 | Customer API | ✅ | CRUD operations |
+| User API | ✅ | CRUD operations |
 | Loading States | ✅ | Spinner while fetching |
 | Error States | ✅ | Error messages + retry |
-| Types Aligned | ✅ | Match FastAPI backend |
+
+### Backend Database ✅
+| Feature | Status | Description |
+|---------|--------|-------------|
+| SQLite | ✅ | Persistent storage |
+| SQLAlchemy | ✅ | ORM for Python |
+| User Model | ✅ | With password hashing |
+| Seed Data | ✅ | Auto-created on startup |
+
+### User Module ✅ (Self-Built!)
+| Feature | Status | Description |
+|---------|--------|-------------|
+| UsersPage | ✅ | List with search |
+| UserDetailPage | ✅ | View single user |
+| AddUserPage | ✅ | Create with password |
+| EditUserPage | ✅ | Update user |
+| UserCard | ✅ | Role-based colors |
+| UserContext | ✅ | API integration |
 
 ---
 
 ## 📁 Files Created/Modified
 
+### Frontend (React)
 ```
 ✨ NEW FILES:
 src/services/
 ├── index.ts              # Central exports
-└── api.ts                # Product & Customer API
+└── api.ts                # Product, Customer, User API
+
+src/pages/User/
+├── UsersPage.tsx         # List users
+├── UserDetailPage.tsx    # View user
+├── AddUserPage.tsx       # Create user
+└── EditUserPage.tsx      # Edit user
+
+src/components/user/
+└── UserCard.tsx          # User card component
+
+src/context/
+└── UserContext.tsx       # User state management
 
 📝 MODIFIED FILES:
-src/types/index.ts        # Aligned with backend (stock, email, etc.)
-src/validation/schemas.ts # Updated for new fields
-src/context/
-├── ProductContext.tsx    # API integration + loading/error
-└── CustomerContext.tsx   # API integration + loading/error
-src/components/
-├── ProductCard.tsx       # stock field, isDeleting prop
-└── customer/CustomerCard.tsx  # New fields, isDeleting prop
-src/pages/
-├── Dashboard.tsx         # Loading/error states
-├── ProductsPage.tsx      # Loading/error + async delete
-├── ProductDetailPage.tsx # Loading/error + async delete
-├── AddProductPage.tsx    # Async submit + new fields
-├── EditProductPage.tsx   # Async submit + new fields
-├── Customer/
-│   ├── CustomersPage.tsx      # Loading/error + async delete
-│   ├── CustomerDetailPage.tsx # Loading/error + async delete
-│   ├── AddCustomerPage.tsx    # Async submit + validation
-│   └── EditCustomerPage.tsx   # Async submit
+src/types/index.ts        # Added User types
+src/context/AppProviders.tsx  # Added UserProvider
+src/App.tsx               # Added User routes
+src/pages/Dashboard.tsx   # Added User stats
+src/components/layout/Layout.tsx  # Added Users nav link
+```
+
+### Backend (FastAPI)
+```
+✨ NEW FILES:
+app/database.py           # SQLite connection
+app/models/user.py        # User Pydantic schema
+app/models/user_model.py  # User SQLAlchemy model
+app/routers/users.py      # User CRUD endpoints
+data/erp.db               # SQLite database file
+
+📝 MODIFIED FILES:
+app/main.py               # Added users router, seed data
+app/models/__init__.py    # Export new models
+requirements.txt          # Added sqlalchemy
 ```
 
 ---
 
-## 🔗 API Endpoints Used
+## 🔗 API Endpoints
 
-| Method | Endpoint | React Function |
-|--------|----------|----------------|
-| GET | `/api/products` | `productApi.getAll()` |
-| GET | `/api/products/:id` | `productApi.getById(id)` |
-| POST | `/api/products` | `productApi.create(data)` |
-| PUT | `/api/products/:id` | `productApi.update(id, data)` |
-| DELETE | `/api/products/:id` | `productApi.delete(id)` |
-| GET | `/api/customers` | `customerApi.getAll()` |
-| GET | `/api/customers/:id` | `customerApi.getById(id)` |
-| POST | `/api/customers` | `customerApi.create(data)` |
-| PUT | `/api/customers/:id` | `customerApi.update(id, data)` |
-| DELETE | `/api/customers/:id` | `customerApi.delete(id)` |
+### Products
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products` | Get all |
+| GET | `/api/products/:id` | Get one |
+| POST | `/api/products` | Create |
+| PUT | `/api/products/:id` | Update |
+| DELETE | `/api/products/:id` | Delete |
+
+### Customers
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/customers` | Get all |
+| GET | `/api/customers/:id` | Get one |
+| POST | `/api/customers` | Create |
+| PUT | `/api/customers/:id` | Update |
+| DELETE | `/api/customers/:id` | Delete |
+
+### Users
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/users` | Get all |
+| GET | `/api/users/:id` | Get one |
+| POST | `/api/users` | Create (with password) |
+| PUT | `/api/users/:id` | Update |
+| DELETE | `/api/users/:id` | Delete |
 
 ---
 
 ## 💡 Key Insights
 
-### 1. fetch() vs axios
+### 1. fetch() Pattern
 ```tsx
-// fetch - Built into browser
-const response = await fetch(url, { method: 'POST', body: JSON.stringify(data) })
-const json = await response.json()
-
-// axios - External library (we didn't use this)
-const { data } = await axios.post(url, data)
+const response = await fetch(url, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data)
+})
+const result = await response.json()
 ```
 
 ### 2. Error Handling Pattern
@@ -139,45 +191,37 @@ try {
   const data = await api.getData()
   setData(data)
 } catch (err) {
-  setError(err instanceof Error ? err.message : 'Unknown error')
+  setError(err.message)
 } finally {
   setLoading(false)
 }
 ```
 
-### 3. Optimistic vs Pessimistic Updates
-```tsx
-// Pessimistic (what we did) - Wait for API, then update UI
-await productApi.create(product)  // Wait
-setProducts([...products, newProduct])  // Then update
-
-// Optimistic - Update UI, then call API
-setProducts([...products, tempProduct])  // Update first
-await productApi.create(product)  // Then call API
-// Roll back if API fails
+### 3. SQLite = Persistent Storage
+```
+Before: Data lost on restart (in-memory)
+After:  Data saved to file (data/erp.db)
 ```
 
-### 4. Type Alignment
-```
-React (frontend)     ↔     FastAPI (backend)
------------------          -----------------
-stock: number        ↔     stock: int
-description?: string ↔     description: Optional[str]
-email: string        ↔     email: EmailStr
+### 4. Password Handling
+```python
+# Backend hashes password
+password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+# Frontend sends plain password
+{ username, email, password: "secret123" }
 ```
 
 ---
 
-## 🏆 Achievement Unlocked!
+## 🏆 Achievements Unlocked!
 
-**"API Master"** 🌐
-> Connected React frontend to FastAPI backend with full CRUD operations!
-
-**New Skills:**
-- 📡 HTTP Requests with fetch()
-- ⏳ Loading state management
-- ❌ Error handling
-- 🔄 Async/await in React
+| Badge | Description |
+|-------|-------------|
+| 🌐 API Master | Connected React to FastAPI |
+| 💾 Database Pro | Added SQLite persistence |
+| 👤 User Builder | Built complete User module |
+| 🔐 Security Start | Implemented password hashing |
 
 ---
 
@@ -186,10 +230,10 @@ email: string        ↔     email: EmailStr
 ```
 Phase 1: Fundamentals    [██████████] 100% ✅
 Phase 2: Intermediate    [██████████] 100% ✅
-Phase 3: Advanced        [████░░░░░░] 40%  ⬆️ NEW!
+Phase 3: Advanced        [██████░░░░] 60%  ⬆️
 Phase 4: Professional    [░░░░░░░░░░] 0%
 ─────────────────────────────────────────────────
-Total Progress:          [███████░░░] 60%
+Total Progress:          [███████░░░] 65%
 ```
 
 ---
@@ -198,6 +242,7 @@ Total Progress:          [███████░░░] 60%
 
 - [x] API Integration (fetch) ✅ Session 5
 - [x] Loading & Error states ✅ Session 5
+- [x] SQLite Database ✅ Session 5
 - [ ] React Query (TanStack Query) ← **NEXT**
 - [ ] Zustand state management
 - [ ] Error boundaries
@@ -215,6 +260,7 @@ Total Progress:          [███████░░░] 60%
 2. **What We'll Refactor:**
    - Replace `useEffect` + `useState` with `useQuery`
    - Replace manual API calls with `useMutation`
+   - Add optimistic updates
 
 ---
 
@@ -226,9 +272,9 @@ Total Progress:          [███████░░░] 60%
 | 2 | Jan 4, 2026 | ~2 hrs | Router, Context |
 | 3 | Jan 7, 2026 | ~1.5 hrs | Custom Hooks |
 | 4 | Jan 10, 2026 | ~2 hrs | useReducer, useRef, Zod |
-| 5 | Jan 11, 2026 | ~2 hrs | API Integration |
+| 5 | Jan 11, 2026 | ~2.5 hrs | API, SQLite, Users |
 
-**Total: ~9.5 hours**
+**Total: ~10 hours**
 
 ---
 
@@ -239,35 +285,35 @@ Total Progress:          [███████░░░] 60%
    cd D:\CODE-BASE\erp-inventory-manager-backend
    python run.py
    ```
-   Backend runs at: http://localhost:8000
-   API docs at: http://localhost:8000/api/docs
 
 2. **Start Frontend:**
    ```bash
    cd D:\CODE-BASE\erp-inventory-manager
    npm run dev
    ```
-   Frontend runs at: http://localhost:5173
 
-3. **Test Flow:**
-   - Dashboard shows data from API ✅
-   - Products list fetches from backend ✅
-   - Add product sends POST request ✅
-   - Edit product sends PUT request ✅
-   - Delete product sends DELETE request ✅
-   - Same for customers ✅
+3. **Test User Module:**
+   - Go to http://localhost:5173/users
+   - See 3 seed users (admin, manager, johndoe)
+   - Create, view, edit, delete users
+   - Data persists after restart!
 
 ---
 
 ## 💪 Great Session!
 
-You've connected your React frontend to a real FastAPI backend!
+### What You Learned:
+- ✅ API integration with fetch()
+- ✅ Loading & error state patterns
+- ✅ SQLite database setup
+- ✅ SQLAlchemy ORM basics
+- ✅ Password hashing
 
-Key accomplishments:
-- ✅ API service layer with fetch()
-- ✅ Loading spinners for better UX
-- ✅ Error handling with retry option
-- ✅ Full CRUD via REST API
-- ✅ Types aligned between frontend & backend
+### What You Built Yourself:
+- ✅ Complete User module (frontend + backend)
+- ✅ Applied all patterns independently
+- ✅ Showed strong understanding!
 
-**Your app is now a real full-stack application!** 🚀
+**You're becoming a full-stack developer!** 🚀
+
+See you in Session 6 for React Query!
