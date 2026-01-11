@@ -3,7 +3,7 @@
 // Like a Java @Service class
 // ============================================
 
-import type { Product, ProductCreate, Customer, CustomerCreate } from '../types'
+import type { Product, ProductCreate, Customer, CustomerCreate, User, UserCreate  } from '../types'
 
 // Base URL for API
 const API_BASE = 'http://localhost:8000/api'
@@ -108,4 +108,40 @@ export const customerApi = {
     fetchApi<void>(`/customers/${id}`, {
       method: 'DELETE',
     }),
+    
+}
+
+// ============================================
+// USER API
+// ============================================
+
+export const userApi = {
+  // GET /api/users
+  getAll: () => 
+    fetchApi<User[]>('/users'),
+
+  // GET /api/users/:id
+  getById: (id: number) => 
+    fetchApi<User>(`/users/${id}`),
+
+  // POST /api/users
+  create: (user: UserCreate) =>
+    fetchApi<User>('/users', {
+      method: 'POST',
+      body: JSON.stringify(user),
+    }),
+
+  // PUT /api/users/:id
+  update: (id: number, user: Partial<UserCreate>) =>
+    fetchApi<User>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(user),
+    }),
+
+  // DELETE /api/users/:id
+  delete: (id: number) =>
+    fetchApi<void>(`/users/${id}`, {
+      method: 'DELETE',
+    }),
+    
 }

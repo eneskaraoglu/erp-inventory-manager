@@ -59,7 +59,17 @@ function Layout({ children }: { children: React.ReactNode }) {
                 Customers
               </Link>
 
-              {/* ✨ NEW: Cart Link with Badge */}
+              <Link
+                to="/users"
+                className={`px-3 py-2 rounded-md ${
+                  location.pathname.startsWith('/users')
+                    ? 'bg-blue-100 text-blue-600' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Users
+              </Link>
+
               <Link
                 to="/cart"
                 className={`px-3 py-2 rounded-md relative ${

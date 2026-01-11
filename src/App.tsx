@@ -26,7 +26,13 @@ import CartPage from './pages/CartPage'
 import UseEffectPractice from './pages/practice/UseEffectPractice'
 import UseStatePractice from './pages/practice/UseStatePractice'
 import UseTogglePractice from './pages/practice/UseTogglePractice'
-import UseRefPractice from './pages/practice/UseRefPractice'  // ✨ NEW
+import UseRefPractice from './pages/practice/UseRefPractice'
+
+// Pages - Customers
+import UsersPage from './pages/User/UsersPage'
+//import CustomerDetailPage from './pages/Customer/CustomerDetailPage'
+//import AddCustomerPage from './pages/Customer/AddCustomerPage'
+//import EditCustomerPage from './pages/Customer/EditCustomerPage'
 
 function App() {
   return (
@@ -56,6 +62,12 @@ function App() {
             <Route path="/practice/useeffect" element={<UseEffectPractice />} />
             <Route path="/practice/usetoggle" element={<UseTogglePractice />} />
             <Route path="/practice/useref" element={<UseRefPractice />} />
+
+            {/* User Routes */}
+            <Route path="/users" element={<UsersPage />} />
+           {/* <Route path="/csers/new" element={<AddUserPage />} />
+            <Route path="/csers/:id" element={<UserDetailPage />} />
+            <Route path="/csers/edit/:id" element={<EditUserPage />} />*/}
           </Routes>
         </Layout>
       </BrowserRouter>
