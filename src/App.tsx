@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
 
 // Single import for all providers!
 import { AppProviders } from './context/AppProviders'
@@ -6,42 +7,70 @@ import { AppProviders } from './context/AppProviders'
 // Error Boundary
 import ErrorBoundary from './components/ErrorBoundary'
 
-// ✨ NEW: Protected Route
+// Protected Route
 import ProtectedRoute from './components/ProtectedRoute'
 
-// Layout
+// Layout - Always loaded (needed for shell)
 import Layout from './components/layout/Layout'
 
-// ✨ NEW: Login Page
+// Login Page - Always loaded (entry point)
 import LoginPage from './pages/LoginPage'
 
-// Pages - Products
+// Dashboard - Always loaded (main page)
 import Dashboard from './pages/Dashboard'
-import ProductsPage from './pages/ProductsPage'
-import ProductDetailPage from './pages/ProductDetailPage'
-import AddProductPage from './pages/AddProductPage'
-import EditProductPage from './pages/EditProductPage'
 
-// Pages - Customers
-import CustomersPage from './pages/Customer/CustomersPage'
-import CustomerDetailPage from './pages/Customer/CustomerDetailPage'
-import AddCustomerPage from './pages/Customer/AddCustomerPage'
-import EditCustomerPage from './pages/Customer/EditCustomerPage'
+// ============================================
+// LAZY LOADED PAGES - Code Splitting!
+// These are only loaded when the route is visited
+// Like Java's lazy initialization or module loading
+// ============================================
 
-// Pages - Users
-import UsersPage from './pages/User/UsersPage'
-import UserDetailPage from './pages/User/UserDetailPage'
-import AddUserPage from './pages/User/AddUserPage'
-import EditUserPage from './pages/User/EditUserPage'
+// Products - Lazy loaded
+const ProductsPage = lazy(() => import('./pages/ProductsPage'))
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
+const AddProductPage = lazy(() => import('./pages/AddProductPage'))
+const EditProductPage = lazy(() => import('./pages/EditProductPage'))
 
-// Pages - Cart (now using Zustand!)
-import CartPage from './pages/CartPage'
+// Customers - Lazy loaded
+const CustomersPage = lazy(() => import('./pages/Customer/CustomersPage'))
+const CustomerDetailPage = lazy(() => import('./pages/Customer/CustomerDetailPage'))
+const AddCustomerPage = lazy(() => import('./pages/Customer/AddCustomerPage'))
+const EditCustomerPage = lazy(() => import('./pages/Customer/EditCustomerPage'))
 
-// Practice Pages (for learning exercises)
-import UseEffectPractice from './pages/practice/UseEffectPractice'
-import UseStatePractice from './pages/practice/UseStatePractice'
-import UseTogglePractice from './pages/practice/UseTogglePractice'
-import UseRefPractice from './pages/practice/UseRefPractice'
+// Users - Lazy loaded
+const UsersPage = lazy(() => import('./pages/User/UsersPage'))
+const UserDetailPage = lazy(() => import('./pages/User/UserDetailPage'))
+const AddUserPage = lazy(() => import('./pages/User/AddUserPage'))
+const EditUserPage = lazy(() => import('./pages/User/EditUserPage'))
+
+// Cart - Lazy loaded
+const CartPage = lazy(() => import('./pages/CartPage'))
+
+// Practice Pages - Lazy loaded
+const UseEffectPractice = lazy(() => import('./pages/practice/UseEffectPractice'))
+const UseStatePractice = lazy(() => import('./pages/practice/UseStatePractice'))
+const UseTogglePractice = lazy(() => import('./pages/practice/UseTogglePractice'))
+const UseRefPractice = lazy(() => import('./pages/practice/UseRefPractice'))
+const PerformancePractice = lazy(() => import('./pages/practice/PerformancePractice'))
+
+// ============================================
+// LOADING FALLBACK - Shows while lazy component loads
+// ============================================
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    </div>
+  )
+}
+
+// ============================================
+// APP COMPONENT
+// ============================================
 
 function App() {
   return (
@@ -50,102 +79,106 @@ function App() {
       <AppProviders>
         <BrowserRouter>
           <Layout>
-            <Routes>
-              {/* ============================================ */}
-              {/* PUBLIC ROUTES - No authentication needed */}
-              {/* ============================================ */}
-              <Route path="/login" element={<LoginPage />} />
+            {/* Suspense wraps lazy-loaded routes */}
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* ============================================ */}
+                {/* PUBLIC ROUTES - No authentication needed */}
+                {/* ============================================ */}
+                <Route path="/login" element={<LoginPage />} />
 
-              {/* ============================================ */}
-              {/* PROTECTED ROUTES - Require authentication */}
-              {/* ============================================ */}
-              
-              {/* Dashboard */}
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } />
+                {/* ============================================ */}
+                {/* PROTECTED ROUTES - Require authentication */}
+                {/* ============================================ */}
+                
+                {/* Dashboard - Not lazy (main entry) */}
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
 
-              {/* Product Routes */}
-              <Route path="/products" element={
-                <ProtectedRoute>
-                  <ProductsPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/products/new" element={
-                <ProtectedRoute>
-                  <AddProductPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/products/:id" element={
-                <ProtectedRoute>
-                  <ProductDetailPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/products/edit/:id" element={
-                <ProtectedRoute>
-                  <EditProductPage />
-                </ProtectedRoute>
-              } />
+                {/* Product Routes - Lazy loaded */}
+                <Route path="/products" element={
+                  <ProtectedRoute>
+                    <ProductsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/products/new" element={
+                  <ProtectedRoute>
+                    <AddProductPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/products/:id" element={
+                  <ProtectedRoute>
+                    <ProductDetailPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/products/edit/:id" element={
+                  <ProtectedRoute>
+                    <EditProductPage />
+                  </ProtectedRoute>
+                } />
 
-              {/* Customer Routes */}
-              <Route path="/customers" element={
-                <ProtectedRoute>
-                  <CustomersPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/customers/new" element={
-                <ProtectedRoute>
-                  <AddCustomerPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/customers/:id" element={
-                <ProtectedRoute>
-                  <CustomerDetailPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/customers/edit/:id" element={
-                <ProtectedRoute>
-                  <EditCustomerPage />
-                </ProtectedRoute>
-              } />
+                {/* Customer Routes - Lazy loaded */}
+                <Route path="/customers" element={
+                  <ProtectedRoute>
+                    <CustomersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/customers/new" element={
+                  <ProtectedRoute>
+                    <AddCustomerPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/customers/:id" element={
+                  <ProtectedRoute>
+                    <CustomerDetailPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/customers/edit/:id" element={
+                  <ProtectedRoute>
+                    <EditCustomerPage />
+                  </ProtectedRoute>
+                } />
 
-              {/* User Routes - Admin only! */}
-              <Route path="/users" element={
-                <ProtectedRoute requiredRoles={['admin', 'manager']}>
-                  <UsersPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/users/new" element={
-                <ProtectedRoute requiredRoles={['admin']}>
-                  <AddUserPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/users/:id" element={
-                <ProtectedRoute requiredRoles={['admin', 'manager']}>
-                  <UserDetailPage />
-                </ProtectedRoute>
-              } />
-              <Route path="/users/edit/:id" element={
-                <ProtectedRoute requiredRoles={['admin']}>
-                  <EditUserPage />
-                </ProtectedRoute>
-              } />
+                {/* User Routes - Admin only! Lazy loaded */}
+                <Route path="/users" element={
+                  <ProtectedRoute requiredRoles={['admin', 'manager']}>
+                    <UsersPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/users/new" element={
+                  <ProtectedRoute requiredRoles={['admin']}>
+                    <AddUserPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/users/:id" element={
+                  <ProtectedRoute requiredRoles={['admin', 'manager']}>
+                    <UserDetailPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/users/edit/:id" element={
+                  <ProtectedRoute requiredRoles={['admin']}>
+                    <EditUserPage />
+                  </ProtectedRoute>
+                } />
 
-              {/* Cart Route */}
-              <Route path="/cart" element={
-                <ProtectedRoute>
-                  <CartPage />
-                </ProtectedRoute>
-              } />
+                {/* Cart Route - Lazy loaded */}
+                <Route path="/cart" element={
+                  <ProtectedRoute>
+                    <CartPage />
+                  </ProtectedRoute>
+                } />
 
-              {/* 🎯 Practice Routes (for learning exercises) */}
-              <Route path="/practice/usestate" element={<UseStatePractice />} />
-              <Route path="/practice/useeffect" element={<UseEffectPractice />} />
-              <Route path="/practice/usetoggle" element={<UseTogglePractice />} />
-              <Route path="/practice/useref" element={<UseRefPractice />} />
-            </Routes>
+                {/* 🎯 Practice Routes (for learning) - Lazy loaded */}
+                <Route path="/practice/usestate" element={<UseStatePractice />} />
+                <Route path="/practice/useeffect" element={<UseEffectPractice />} />
+                <Route path="/practice/usetoggle" element={<UseTogglePractice />} />
+                <Route path="/practice/useref" element={<UseRefPractice />} />
+                <Route path="/practice/performance" element={<PerformancePractice />} />
+              </Routes>
+            </Suspense>
           </Layout>
         </BrowserRouter>
       </AppProviders>

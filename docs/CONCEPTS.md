@@ -463,6 +463,65 @@ async function fetchApi(endpoint, options) {
 
 ---
 
+## Performance Patterns ✨ NEW
+
+### useMemo - Cache Values
+```tsx
+// ❌ Runs every render
+const filtered = products.filter(p => p.price > 100)
+
+// ✅ Only runs when products changes
+const filtered = useMemo(() => 
+  products.filter(p => p.price > 100)
+, [products])
+```
+
+### useCallback - Cache Functions
+```tsx
+// ❌ New function every render
+const handleClick = () => console.log('click')
+
+// ✅ Same function reference
+const handleClick = useCallback(() => {
+  console.log('click')
+}, [])  // Empty deps = never changes
+```
+
+### React.memo - Cache Components
+```tsx
+// ❌ Re-renders when parent re-renders
+function Child({ name }) { return <div>{name}</div> }
+
+// ✅ Only re-renders when props change
+const Child = memo(function Child({ name }) {
+  return <div>{name}</div>
+})
+```
+
+### Code Splitting
+```tsx
+// ❌ Loaded immediately
+import ProductsPage from './pages/ProductsPage'
+
+// ✅ Loaded when needed
+const ProductsPage = lazy(() => import('./pages/ProductsPage'))
+
+// Wrap in Suspense
+<Suspense fallback={<Loading />}>
+  <ProductsPage />
+</Suspense>
+```
+
+### When to Optimize
+| Use | When |
+|-----|------|
+| useMemo | Expensive calculations |
+| useCallback | Passing to memoized children |
+| React.memo | Pure components with stable props |
+| Code Splitting | Large pages/routes |
+
+---
+
 ## Quick Reference URLs
 
 | Service | URL |
