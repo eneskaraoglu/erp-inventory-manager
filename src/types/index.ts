@@ -58,3 +58,27 @@ export type UserCreate = {
 export type UserUpdate = Partial<UserCreate> & {
   is_active?: boolean
 }
+
+// ============================================
+// AUTH TYPES - For authentication
+// ============================================
+
+export type LoginRequest = {
+  username: string
+  password: string
+}
+
+export type LoginResponse = {
+  access_token: string
+  token_type: string
+  user: AuthUser
+}
+
+export type AuthUser = {
+  id: number
+  username: string
+  email: string
+  full_name?: string
+  role: string
+  is_active: boolean
+}

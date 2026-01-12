@@ -3,11 +3,17 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 // Single import for all providers!
 import { AppProviders } from './context/AppProviders'
 
-// ✨ NEW: Error Boundary
+// Error Boundary
 import ErrorBoundary from './components/ErrorBoundary'
+
+// ✨ NEW: Protected Route
+import ProtectedRoute from './components/ProtectedRoute'
 
 // Layout
 import Layout from './components/layout/Layout'
+
+// ✨ NEW: Login Page
+import LoginPage from './pages/LoginPage'
 
 // Pages - Products
 import Dashboard from './pages/Dashboard'
@@ -39,34 +45,100 @@ import UseRefPractice from './pages/practice/UseRefPractice'
 
 function App() {
   return (
-    // ✨ Error Boundary wraps everything
+    // Error Boundary wraps everything
     <ErrorBoundary>
       <AppProviders>
         <BrowserRouter>
           <Layout>
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              {/* ============================================ */}
+              {/* PUBLIC ROUTES - No authentication needed */}
+              {/* ============================================ */}
+              <Route path="/login" element={<LoginPage />} />
+
+              {/* ============================================ */}
+              {/* PROTECTED ROUTES - Require authentication */}
+              {/* ============================================ */}
+              
+              {/* Dashboard */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
 
               {/* Product Routes */}
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/products/new" element={<AddProductPage />} />
-              <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/products/edit/:id" element={<EditProductPage />} />
+              <Route path="/products" element={
+                <ProtectedRoute>
+                  <ProductsPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/products/new" element={
+                <ProtectedRoute>
+                  <AddProductPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/products/:id" element={
+                <ProtectedRoute>
+                  <ProductDetailPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/products/edit/:id" element={
+                <ProtectedRoute>
+                  <EditProductPage />
+                </ProtectedRoute>
+              } />
 
               {/* Customer Routes */}
-              <Route path="/customers" element={<CustomersPage />} />
-              <Route path="/customers/new" element={<AddCustomerPage />} />
-              <Route path="/customers/:id" element={<CustomerDetailPage />} />
-              <Route path="/customers/edit/:id" element={<EditCustomerPage />} />
+              <Route path="/customers" element={
+                <ProtectedRoute>
+                  <CustomersPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/customers/new" element={
+                <ProtectedRoute>
+                  <AddCustomerPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/customers/:id" element={
+                <ProtectedRoute>
+                  <CustomerDetailPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/customers/edit/:id" element={
+                <ProtectedRoute>
+                  <EditCustomerPage />
+                </ProtectedRoute>
+              } />
 
-              {/* User Routes */}
-              <Route path="/users" element={<UsersPage />} />
-              <Route path="/users/new" element={<AddUserPage />} />
-              <Route path="/users/:id" element={<UserDetailPage />} />
-              <Route path="/users/edit/:id" element={<EditUserPage />} />
+              {/* User Routes - Admin only! */}
+              <Route path="/users" element={
+                <ProtectedRoute requiredRoles={['admin', 'manager']}>
+                  <UsersPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/users/new" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <AddUserPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/users/:id" element={
+                <ProtectedRoute requiredRoles={['admin', 'manager']}>
+                  <UserDetailPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/users/edit/:id" element={
+                <ProtectedRoute requiredRoles={['admin']}>
+                  <EditUserPage />
+                </ProtectedRoute>
+              } />
 
-              {/* Cart Route (now using Zustand!) */}
-              <Route path="/cart" element={<CartPage />} />
+              {/* Cart Route */}
+              <Route path="/cart" element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              } />
 
               {/* 🎯 Practice Routes (for learning exercises) */}
               <Route path="/practice/usestate" element={<UseStatePractice />} />

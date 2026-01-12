@@ -3,14 +3,32 @@
 // Like a Java @Service class
 // ============================================
 
-import type { Product, ProductCreate, Customer, CustomerCreate, User, UserCreate  } from '../types'
+import type { Product, ProductCreate, Customer, CustomerCreate, User, UserCreate, LoginRequest, LoginResponse, AuthUser } from '../types'
 
 // Base URL for API
 const API_BASE = 'http://localhost:8000/api'
 
 // ============================================
+// TOKEN HELPER
+// Gets token from localStorage (set by Zustand persist)
+// ============================================
+
+function getAuthToken(): string | null {
+  try {
+    const authStorage = localStorage.getItem('auth-storage')
+    if (authStorage) {
+      const parsed = JSON.parse(authStorage)
+      return parsed.state?.token || null
+    }
+  } catch {
+    return null
+  }
+  return null
+}
+
+// ============================================
 // GENERIC FETCH WRAPPER
-// Handles errors consistently
+// Handles errors consistently + adds auth token
 // ============================================
 
 async function fetchApi<T>(
@@ -19,13 +37,26 @@ async function fetchApi<T>(
 ): Promise<T> {
   const url = `${API_BASE}${endpoint}`
   
+  // Get auth token if available
+  const token = getAuthToken()
+  
   const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
+      // Add Authorization header if token exists
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options?.headers,
     },
     ...options,
   })
+
+  // Handle 401 Unauthorized - redirect to login
+  if (response.status === 401) {
+    // Clear auth storage and redirect
+    localStorage.removeItem('auth-storage')
+    window.location.href = '/login'
+    throw new Error('Session expired. Please log in again.')
+  }
 
   // Handle HTTP errors
   if (!response.ok) {
@@ -144,4 +175,32 @@ export const userApi = {
       method: 'DELETE',
     }),
     
+}
+
+// ============================================
+// AUTH API
+// Like AuthenticationService in Java
+// ============================================
+
+export const authApi = {
+  // POST /api/auth/login
+  login: (credentials: LoginRequest) =>
+    fetchApi<LoginResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    }),
+
+  // GET /api/auth/me (requires token in header)
+  getMe: (token: string) =>
+    fetchApi<AuthUser>('/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    }),
+
+  // POST /api/auth/logout
+  logout: () =>
+    fetchApi<{ message: string }>('/auth/logout', {
+      method: 'POST',
+    }),
 }

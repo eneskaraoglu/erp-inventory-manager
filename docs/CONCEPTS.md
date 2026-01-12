@@ -369,6 +369,100 @@ components/user/
 
 ---
 
+## Authentication Patterns ✨ NEW
+
+### JWT Token Flow
+```
+Login → Token → Store → API Calls → Validate
+  │       │       │         │          │
+  │       │       │         │          └── Backend verifies
+  │       │       │         └── Authorization header
+  │       │       └── Zustand persist → localStorage
+  │       └── Backend returns JWT
+  └── POST /auth/login
+```
+
+### Auth Store (Zustand)
+```tsx
+const useAuthStore = create(persist(
+  (set) => ({
+    user: null,
+    token: null,
+    isAuthenticated: false,
+    
+    login: async (credentials) => {
+      const response = await authApi.login(credentials)
+      set({ user: response.user, token: response.access_token, isAuthenticated: true })
+    },
+    
+    logout: () => {
+      set({ user: null, token: null, isAuthenticated: false })
+    },
+  }),
+  { name: 'auth-storage' }  // localStorage key
+))
+```
+
+### Protected Route
+```tsx
+function ProtectedRoute({ children, requiredRoles }) {
+  const { isAuthenticated, user } = useAuthStore()
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />
+  }
+  
+  if (requiredRoles && !requiredRoles.includes(user.role)) {
+    return <AccessDenied />
+  }
+  
+  return children
+}
+```
+
+### Usage in Routes
+```tsx
+// Any authenticated user
+<Route path="/dashboard" element={
+  <ProtectedRoute>
+    <Dashboard />
+  </ProtectedRoute>
+} />
+
+// Admin only
+<Route path="/users" element={
+  <ProtectedRoute requiredRoles={['admin']}>
+    <UsersPage />
+  </ProtectedRoute>
+} />
+```
+
+### Auto Token in API
+```tsx
+async function fetchApi(endpoint, options) {
+  const token = getAuthToken()  // From localStorage
+  
+  return fetch(url, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      ...options?.headers,
+    },
+  })
+}
+```
+
+### Java ↔ React Auth Comparison
+| Java/Spring | React |
+|-------------|-------|
+| SecurityContextHolder | useAuthStore |
+| @PreAuthorize | ProtectedRoute |
+| @AuthenticationPrincipal | useCurrentUser() |
+| JwtFilter | fetchApi wrapper |
+| HttpSession | localStorage |
+| BCryptPasswordEncoder | sha256 (demo) |
+
+---
+
 ## Quick Reference URLs
 
 | Service | URL |
