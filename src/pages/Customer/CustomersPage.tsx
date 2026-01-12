@@ -59,9 +59,14 @@ function CustomersPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Customers</h1>
-        <Link to="/customers/new" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-          + Add Customer
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/customers/grid" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            📊 Grid View
+          </Link>
+          <Link to="/customers/new" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            + Add Customer
+          </Link>
+        </div>
       </div>
 
       <input

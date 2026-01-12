@@ -522,6 +522,70 @@ const ProductsPage = lazy(() => import('./pages/ProductsPage'))
 
 ---
 
+## AG Grid Patterns ✨ NEW
+
+### Basic Setup (v35+)
+```tsx
+import { AgGridReact } from 'ag-grid-react'
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
+import type { ColDef } from 'ag-grid-community'
+
+// Register modules (required in v35+)
+ModuleRegistry.registerModules([AllCommunityModule])
+
+// Column definitions
+const columnDefs: ColDef[] = [
+  { field: 'name', headerName: 'Name', flex: 1 },
+  { field: 'price', valueFormatter: p => `${p.value}` },
+]
+
+// Render
+<div style={{ height: 500 }}>
+  <AgGridReact
+    rowData={data}
+    columnDefs={columnDefs}
+    pagination={true}
+  />
+</div>
+```
+
+### Conditional Cell Styling
+```tsx
+{
+  field: 'stock',
+  cellStyle: (params) => {
+    if (params.value <= 0) return { color: 'red' }
+    if (params.value < 10) return { color: 'orange' }
+    return { color: 'green' }
+  }
+}
+```
+
+### Custom Cell Renderer
+```tsx
+function ActionRenderer(props: ICellRendererParams<Product>) {
+  return (
+    <button onClick={() => handleEdit(props.data)}>
+      Edit
+    </button>
+  )
+}
+
+// Use in column
+{ cellRenderer: ActionRenderer }
+```
+
+### Java ↔ AG Grid Comparison
+| AG Grid | Java Equivalent |
+|---------|----------------|
+| AgGridReact | JTable |
+| ColDef[] | TableColumn[] |
+| rowData | TableModel |
+| cellRenderer | TableCellRenderer |
+| onRowClicked | ListSelectionListener |
+
+---
+
 ## Quick Reference URLs
 
 | Service | URL |

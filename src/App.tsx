@@ -27,18 +27,21 @@ import Dashboard from './pages/Dashboard'
 
 // Products - Lazy loaded
 const ProductsPage = lazy(() => import('./pages/ProductsPage'))
+const ProductsGridPage = lazy(() => import('./pages/ProductsGridPage'))  // AG Grid version
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'))
 const AddProductPage = lazy(() => import('./pages/AddProductPage'))
 const EditProductPage = lazy(() => import('./pages/EditProductPage'))
 
 // Customers - Lazy loaded
 const CustomersPage = lazy(() => import('./pages/Customer/CustomersPage'))
+const CustomersGridPage = lazy(() => import('./pages/Customer/CustomersGridPage'))  // AG Grid version
 const CustomerDetailPage = lazy(() => import('./pages/Customer/CustomerDetailPage'))
 const AddCustomerPage = lazy(() => import('./pages/Customer/AddCustomerPage'))
 const EditCustomerPage = lazy(() => import('./pages/Customer/EditCustomerPage'))
 
 // Users - Lazy loaded
 const UsersPage = lazy(() => import('./pages/User/UsersPage'))
+const UsersGridPage = lazy(() => import('./pages/User/UsersGridPage'))  // AG Grid version
 const UserDetailPage = lazy(() => import('./pages/User/UserDetailPage'))
 const AddUserPage = lazy(() => import('./pages/User/AddUserPage'))
 const EditUserPage = lazy(() => import('./pages/User/EditUserPage'))
@@ -104,6 +107,12 @@ function App() {
                     <ProductsPage />
                   </ProtectedRoute>
                 } />
+                {/* AG Grid version of products */}
+                <Route path="/products/grid" element={
+                  <ProtectedRoute>
+                    <ProductsGridPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/products/new" element={
                   <ProtectedRoute>
                     <AddProductPage />
@@ -126,6 +135,12 @@ function App() {
                     <CustomersPage />
                   </ProtectedRoute>
                 } />
+                {/* AG Grid version of customers */}
+                <Route path="/customers/grid" element={
+                  <ProtectedRoute>
+                    <CustomersGridPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/customers/new" element={
                   <ProtectedRoute>
                     <AddCustomerPage />
@@ -146,6 +161,12 @@ function App() {
                 <Route path="/users" element={
                   <ProtectedRoute requiredRoles={['admin', 'manager']}>
                     <UsersPage />
+                  </ProtectedRoute>
+                } />
+                {/* AG Grid version of users */}
+                <Route path="/users/grid" element={
+                  <ProtectedRoute requiredRoles={['admin', 'manager']}>
+                    <UsersGridPage />
                   </ProtectedRoute>
                 } />
                 <Route path="/users/new" element={
