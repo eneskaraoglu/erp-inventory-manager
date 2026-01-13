@@ -10,7 +10,7 @@ import type { User } from '../../types'
 ModuleRegistry.registerModules([AllCommunityModule])
 
 function UsersGridPage() {
-  const { users, loading, error, deleteUser } = useUsers()
+  const { users, loading, error } = useUsers()
   const [searchTerm, setSearchTerm] = useState('')
   const navigate = useNavigate()
 
@@ -47,7 +47,7 @@ function UsersGridPage() {
       width: 120,
       filter: 'agTextColumnFilter',
       // Custom cell style based on role
-      cellStyle: (params) => {
+      cellStyle: (params): { backgroundColor: string; color: string; fontWeight?: string } | null => {
         switch (params.value) {
           case 'admin': return { backgroundColor: '#fee2e2', color: '#dc2626', fontWeight: 'bold' }
           case 'manager': return { backgroundColor: '#dbeafe', color: '#2563eb', fontWeight: 'bold' }
@@ -77,6 +77,7 @@ function UsersGridPage() {
       }
     },
     {
+      colId: 'actions',
       headerName: 'Actions',
       width: 200,
       sortable: false,
@@ -105,8 +106,10 @@ function UsersGridPage() {
 
   // Row click handler
   const onRowClicked = useCallback((event: RowClickedEvent<User>) => {
-    if (event.colDef?.headerName === 'Actions') return
-    navigate(`/users/${event.data?.id}`)
+    // Ignore clicks on buttons (Actions column)
+    const target = event.event?.target as HTMLElement
+    if (target?.closest('button') || !event.data) return
+    navigate(`/users/${event.data.id}`)
   }, [navigate])
 
   // Loading state

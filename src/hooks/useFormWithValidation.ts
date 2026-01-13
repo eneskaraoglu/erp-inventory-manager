@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { z } from 'zod'
 
 /**
@@ -83,7 +83,7 @@ function useFormWithValidation<T extends Record<string, any>>({
       return true
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const fieldError = error.errors[0]?.message
+        const fieldError = error.issues[0]?.message
         setErrors(prev => ({ ...prev, [name]: fieldError }))
       }
       return false
@@ -100,7 +100,7 @@ function useFormWithValidation<T extends Record<string, any>>({
       if (error instanceof z.ZodError) {
         const newErrors: Partial<Record<keyof T, string>> = {}
         
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           const field = err.path[0] as keyof T
           if (!newErrors[field]) {
             newErrors[field] = err.message

@@ -49,13 +49,14 @@ function ProductsGridPage() {
       width: 100,
       filter: 'agNumberColumnFilter',
       // Color based on stock level
-      cellStyle: (params) => {
+      cellStyle: (params): { color: string; fontWeight?: string } | null => {
         if (params.value <= 0) return { color: 'red', fontWeight: 'bold' }
         if (params.value < 10) return { color: 'orange' }
         return { color: 'green' }
       }
     },
     {
+      colId: 'actions',
       headerName: 'Actions',
       width: 280,
       sortable: false,
@@ -82,8 +83,10 @@ function ProductsGridPage() {
 
   // Row click handler
   const onRowClicked = useCallback((event: RowClickedEvent<Product>) => {
-    if (event.colDef?.headerName === 'Actions') return
-    navigate(`/products/${event.data?.id}`)
+    // Ignore clicks on buttons (Actions column)
+    const target = event.event?.target as HTMLElement
+    if (target?.closest('button') || !event.data) return
+    navigate(`/products/${event.data.id}`)
   }, [navigate])
 
   // Loading state
@@ -193,10 +196,9 @@ function ProductActionRenderer(props: ICellRendererParams<Product>) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation()
     addItem({
-      productId: product.id,
+      id: product.id,
       name: product.name,
-      price: product.price,
-      quantity: 1
+      price: product.price
     })
   }
 

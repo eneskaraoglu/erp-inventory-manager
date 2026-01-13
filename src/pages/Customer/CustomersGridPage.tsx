@@ -17,7 +17,7 @@ ModuleRegistry.registerModules([AllCommunityModule])
 // ============================================
 
 function CustomersGridPage() {
-  const { customers, loading, error, deleteCustomer } = useCustomers()
+  const { customers, loading, error } = useCustomers()
   const [searchTerm, setSearchTerm] = useState('')
   const navigate = useNavigate()
 
@@ -62,6 +62,7 @@ function CustomersGridPage() {
       valueFormatter: (params) => params.value || 'N/A'
     },
     {
+      colId: 'actions',
       headerName: 'Actions',
       width: 200,
       sortable: false,
@@ -98,8 +99,10 @@ function CustomersGridPage() {
   // Navigate to detail page when row clicked
   // ============================================
   const onRowClicked = useCallback((event: RowClickedEvent<Customer>) => {
-    if (event.colDef?.headerName === 'Actions') return
-    navigate(`/customers/${event.data?.id}`)
+    // Ignore clicks on buttons (Actions column)
+    const target = event.event?.target as HTMLElement
+    if (target?.closest('button') || !event.data) return
+    navigate(`/customers/${event.data.id}`)
   }, [navigate])
 
   // Loading state

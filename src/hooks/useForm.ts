@@ -1,4 +1,4 @@
-import { useState, ChangeEvent } from 'react'
+import { useState, type ChangeEvent } from 'react'
 
 /**
  * useForm - Custom Hook for form state management
