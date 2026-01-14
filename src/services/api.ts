@@ -6,9 +6,9 @@
 import type { Product, ProductCreate, Customer, CustomerCreate, User, UserCreate, LoginRequest, LoginResponse, AuthUser } from '../types'
 
 // Base URL for API - from environment variable
-// In development: http://localhost:8000/api
-// In production: your deployed API URL
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+// In development: http://localhost:8000/api (full URL)
+// In production/Docker: /api (relative URL - nginx proxies to backend)
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 
 // ============================================
 // TOKEN HELPER
