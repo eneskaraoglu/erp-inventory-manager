@@ -1,215 +1,151 @@
-# Session 9 - AG Grid Integration
-**Date:** January 12, 2026  
-**Duration:** ~45 minutes  
-**Topic:** Professional Data Grid for All Modules
+# Session 9 - Docker Deployment 🐳
+**Date:** January 13, 2026  
+**Duration:** ~2 hours  
+**Topic:** DevOps - Docker & Deployment
 
 ---
 
 ## 🎯 Session Goals - ✅ All Completed!
 
-- [x] Install AG Grid (v35)
-- [x] Create CustomersGridPage with AG Grid
-- [x] Create ProductsGridPage with AG Grid
-- [x] Create UsersGridPage with AG Grid
-- [x] Learn ColDef (column definitions)
-- [x] Learn custom cell renderers
-- [x] Learn cell styling (conditional colors)
-- [x] Add sorting, filtering, pagination
+- [x] Create Dockerfiles for frontend and backend
+- [x] Set up docker-compose for orchestration
+- [x] Push images to Docker Hub
+- [x] Deploy on remote Ubuntu server
+- [x] Fix Nginx proxy for portable deployment
 
 ---
 
 ## ✅ Concepts Learned
 
-### AG Grid - Java Comparison
+### 1. Docker Basics
 
-| AG Grid | Purpose | Java Equivalent |
+| Concept | Purpose | Java Equivalent |
 |---------|---------|-----------------|
-| `AgGridReact` | Grid component | JTable |
-| `ColDef[]` | Column definitions | TableColumn[] |
-| `rowData` | Data array | TableModel data |
-| `cellRenderer` | Custom cell content | TableCellRenderer |
-| `cellStyle` | Conditional styling | Custom renderer |
-| `valueFormatter` | Format display value | toString() override |
-| `onRowClicked` | Row click handler | ListSelectionListener |
-| `pagination` | Page through data | Custom pagination |
+| Dockerfile | Build instructions | pom.xml + build script |
+| Image | Built application | JAR/WAR file |
+| Container | Running instance | Running JVM |
+| docker-compose | Multi-container orchestration | Application server config |
+| Volume | Persistent storage | External database |
+| Network | Container communication | Service discovery |
 
-### AG Grid v35 Setup (Important!)
+### 2. Multi-Stage Build (Frontend)
 
-```tsx
-// v35+ requires module registration
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
-import type { ColDef } from 'ag-grid-community'  // Use 'type' import!
+```dockerfile
+# Stage 1: Build
+FROM node:20-alpine AS builder
+RUN npm run build
 
-ModuleRegistry.registerModules([AllCommunityModule])
+# Stage 2: Production (smaller image!)
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
 ```
 
-### Column Definition Properties
+### 3. Nginx Proxy
 
-| Property | Purpose | Example |
-|----------|---------|---------|
-| `field` | Data property | `field: 'name'` |
-| `headerName` | Column header | `headerName: 'Name'` |
-| `width` | Fixed width | `width: 100` |
-| `flex` | Flexible width | `flex: 1` |
-| `sortable` | Enable sorting | `sortable: true` |
-| `filter` | Enable filtering | `filter: 'agTextColumnFilter'` |
-| `cellRenderer` | Custom component | `cellRenderer: MyRenderer` |
-| `cellStyle` | Conditional style | `cellStyle: (p) => ({...})` |
-| `valueFormatter` | Format value | `valueFormatter: (p) => ...` |
+The key insight: **React runs in the browser, not in the container!**
 
-### Filter Types
+```
+Without Proxy:
+  Browser → http://localhost:8001/api ❌ (localhost = user's PC)
 
-| Type | Use For |
+With Nginx Proxy:
+  Browser → http://server:3000/api → Nginx → backend:8001 ✅
+```
+
+---
+
+## 🛠️ Files Created
+
+### Backend
+| File | Purpose |
 |------|---------|
-| `agTextColumnFilter` | Text columns |
-| `agNumberColumnFilter` | Number columns |
-| `agDateColumnFilter` | Date columns |
+| `Dockerfile` | Build FastAPI container |
+| `docker-compose.yml` | Run backend only |
+| `docker-compose.prod.yml` | Run full stack |
+| `.dockerignore` | Exclude files from build |
+| `DOCKER_GUIDE.md` | Documentation |
+
+### Frontend
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Multi-stage build (Node → Nginx) |
+| `docker-compose.yml` | Run frontend only |
+| `nginx.conf` | SPA routing + API proxy |
+| `.dockerignore` | Exclude files from build |
 
 ---
 
-## 🛠️ Features Built
+## 🔑 Key Insights
 
-### ProductsGridPage ✅
-| Feature | Description |
-|---------|-------------|
-| All columns | ID, Name, Category, Price, Stock |
-| Stock colors | Red (0), Orange (<10), Green (10+) |
-| Price formatting | `$99.00` format |
-| Add to Cart | Button in actions column |
-| Edit/Delete | Action buttons |
-
-### CustomersGridPage ✅
-| Feature | Description |
-|---------|-------------|
-| All columns | ID, Name, Email, Phone, Company |
-| Company fallback | Shows "N/A" if empty |
-| Edit/Delete | Action buttons |
-
-### UsersGridPage ✅
-| Feature | Description |
-|---------|-------------|
-| All columns | ID, Username, Email, Full Name, Role, Status, Created |
-| Role badges | Admin (red), Manager (blue), User (gray) |
-| Status colors | Active (green), Inactive (red) |
-| Date formatting | Formatted created_at |
-| Edit/Delete | Action buttons |
-
----
-
-## 📁 Files Created/Modified
+### 1. Why Nginx Proxy is Essential
 
 ```
-✨ NEW FILES:
-src/pages/ProductsGridPage.tsx           # Products AG Grid
-src/pages/Customer/CustomersGridPage.tsx # Customers AG Grid
-src/pages/User/UsersGridPage.tsx         # Users AG Grid
-
-📝 MODIFIED FILES:
-src/App.tsx                              # Added grid routes
-src/pages/ProductsPage.tsx               # Added "Grid View" button
-src/pages/Customer/CustomersPage.tsx     # Added "Grid View" button
-src/pages/User/UsersPage.tsx             # Added "Grid View" button
-package.json                             # Added ag-grid dependencies
+Problem:  Frontend built with http://192.168.1.2:8001
+          → Only works on that specific server!
+          
+Solution: Frontend built with /api (relative)
+          → Nginx proxies to backend
+          → Works on ANY server!
 ```
 
----
+### 2. Docker Network
 
-## 🔗 Routes
+Containers can communicate using service names:
 
-| Module | Card View | Grid View |
-|--------|-----------|-----------|
-| Products | `/products` | `/products/grid` |
-| Customers | `/customers` | `/customers/grid` |
-| Users | `/users` | `/users/grid` |
-
----
-
-## 💡 Key Patterns
-
-### 1. Basic AG Grid Setup (v35)
-```tsx
-import { AgGridReact } from 'ag-grid-react'
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community'
-import type { ColDef } from 'ag-grid-community'
-
-ModuleRegistry.registerModules([AllCommunityModule])
-
-<div style={{ height: 500 }}>
-  <AgGridReact
-    rowData={data}
-    columnDefs={columnDefs}
-    pagination={true}
-    paginationPageSize={10}
-  />
-</div>
+```yaml
+services:
+  backend:
+    ...
+  frontend:
+    depends_on:
+      - backend  # Can reach backend at http://backend:8001
 ```
 
-### 2. Column with Conditional Styling
-```tsx
-{
-  field: 'stock',
-  cellStyle: (params) => {
-    if (params.value <= 0) return { color: 'red' }
-    if (params.value < 10) return { color: 'orange' }
-    return { color: 'green' }
-  }
-}
-```
+### 3. Volume for Data Persistence
 
-### 3. Custom Cell Renderer
-```tsx
-function ActionRenderer(props: ICellRendererParams<Product>) {
-  const product = props.data
-  return (
-    <button onClick={() => handleEdit(product)}>Edit</button>
-  )
-}
-
-// Use in column
-{ cellRenderer: ActionRenderer }
-```
-
-### 4. Value Formatter
-```tsx
-{
-  field: 'price',
-  valueFormatter: (params) => `$${params.value?.toFixed(2)}`
-}
+```yaml
+volumes:
+  - backend_data:/app/data  # SQLite survives container restart
 ```
 
 ---
 
-## 📦 Installation
+## 📊 Architecture
 
-```bash
-npm install ag-grid-react ag-grid-community
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Docker Host (Any Server)                                       │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────────┐   │
+│  │ Docker Network (erp-network)                            │   │
+│  │                                                         │   │
+│  │  ┌─────────────────┐      ┌─────────────────┐          │   │
+│  │  │   Frontend      │ ───▶ │    Backend      │          │   │
+│  │  │   (Nginx)       │ /api │    (FastAPI)    │          │   │
+│  │  │   Port 3000     │      │    Port 8001    │          │   │
+│  │  └─────────────────┘      └─────────────────┘          │   │
+│  │                                  │                      │   │
+│  │                           ┌──────▼──────┐              │   │
+│  │                           │   Volume    │              │   │
+│  │                           │  (SQLite)   │              │   │
+│  │                           └─────────────┘              │   │
+│  └─────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎓 AG Grid vs Card View
-
-| Aspect | Card View | Grid View |
-|--------|-----------|-----------|
-| Best for | Visual browsing | Data analysis |
-| Mobile | ✅ Responsive | ⚠️ Scroll needed |
-| Sorting | Manual | ✅ Built-in |
-| Filtering | Search only | ✅ Per-column |
-| Data density | Low | High |
-| Actions | Visible | In row |
-
-**Use Cards:** When visual presentation matters (e.g., product catalog)
-**Use Grid:** When data analysis matters (e.g., inventory management, reports)
-
----
-
-## 📊 Progress Update
+## 🚀 Deployment Workflow
 
 ```
-Session 9: AG Grid       [██████████] 100% ✅
-─────────────────────────────────────────────
-Total Sessions:          9 completed
-Total Time:              ~16 hours
+Development PC                    Docker Hub                    Production Server
+──────────────                    ──────────                    ─────────────────
+
+1. docker build                        
+2. docker push      ───────────▶  [eneskaraoglu/erp-backend]
+                                  [eneskaraoglu/erp-frontend]  ───────▶  3. docker pull
+                                                                        4. docker-compose up
+                                                                        5. App running! 🎉
 ```
 
 ---
@@ -218,34 +154,77 @@ Total Time:              ~16 hours
 
 | Badge | Description |
 |-------|-------------|
-| 📊 Grid Master | Implemented AG Grid for all modules |
-| 🎨 Cell Stylist | Added conditional cell styling |
-| 🔧 Custom Renderer | Built action button renderers |
+| 🐳 Docker Master | Created multi-container app |
+| 📦 Image Publisher | Pushed to Docker Hub |
+| 🌐 DevOps Engineer | Deployed to remote server |
+| 🔧 Nginx Pro | Configured reverse proxy |
 
 ---
 
-## 📈 Complete Feature Matrix
+## 📈 Complete Learning Progress
 
-| Feature | Products | Customers | Users |
-|---------|:--------:|:---------:|:-----:|
-| Card View | ✅ | ✅ | ✅ |
-| Grid View | ✅ | ✅ | ✅ |
-| Sorting | ✅ | ✅ | ✅ |
-| Filtering | ✅ | ✅ | ✅ |
-| Pagination | ✅ | ✅ | ✅ |
-| Search | ✅ | ✅ | ✅ |
-| CRUD | ✅ | ✅ | ✅ |
-| Conditional Styling | ✅ | - | ✅ |
+```
+Phase 1: Fundamentals    [██████████] 100% ✅
+Phase 2: Intermediate    [██████████] 100% ✅
+Phase 3: Advanced        [██████████] 100% ✅
+Phase 4: Professional    [██████████] 100% ✅
+Phase 5: DevOps          [██████████] 100% ✅ NEW!
+─────────────────────────────────────────────────
+Total Progress:          [██████████] 100% 🎉
+```
 
 ---
 
-## 🎉 Session Complete!
+## 📋 Quick Reference
 
-You now have professional data grids for all modules with:
-- Sorting & filtering
-- Pagination
-- Conditional styling
-- Custom action buttons
-- Both card and grid views
+### Build & Push
+```bash
+# Backend
+cd erp-inventory-manager-backend
+docker build -t eneskaraoglu/erp-backend:latest .
+docker push eneskaraoglu/erp-backend:latest
 
-**Great job!** 🚀
+# Frontend
+cd erp-inventory-manager
+docker build -t eneskaraoglu/erp-frontend:latest .
+docker push eneskaraoglu/erp-frontend:latest
+```
+
+### Deploy (Any Server)
+```bash
+# Create docker-compose.yml, then:
+docker-compose pull
+docker-compose up -d
+```
+
+### Common Commands
+```bash
+docker-compose up -d       # Start
+docker-compose down        # Stop
+docker-compose logs -f     # View logs
+docker-compose pull        # Update images
+docker-compose ps          # Check status
+```
+
+---
+
+## 🔗 Resources
+
+- [Docker Documentation](https://docs.docker.com/)
+- [Docker Hub](https://hub.docker.com/)
+- [Nginx Documentation](https://nginx.org/en/docs/)
+- [Docker Compose Reference](https://docs.docker.com/compose/)
+
+---
+
+## ➡️ What's Next?
+
+1. **CI/CD Pipeline** - GitHub Actions for automatic build & deploy
+2. **HTTPS** - SSL certificates with Let's Encrypt
+3. **Monitoring** - Prometheus + Grafana
+4. **Kubernetes** - Container orchestration at scale
+5. **Cloud Deployment** - AWS, GCP, or Azure
+
+---
+
+**You're now a Full-Stack + DevOps Developer!** 🎉

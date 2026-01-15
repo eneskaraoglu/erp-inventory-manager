@@ -586,6 +586,95 @@ function ActionRenderer(props: ICellRendererParams<Product>) {
 
 ---
 
+## Recharts Patterns ✨ NEW (Session 10)
+
+### Basic Setup
+```tsx
+import {
+  BarChart, Bar,
+  PieChart, Pie, Cell,
+  LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer
+} from 'recharts'
+
+// Data format for charts
+const data = [
+  { name: 'Electronics', count: 5 },
+  { name: 'Clothing', count: 3 },
+]
+```
+
+### Bar Chart
+```tsx
+<ResponsiveContainer width="100%" height={300}>
+  <BarChart data={data}>
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="name" />
+    <YAxis />
+    <Tooltip />
+    <Bar dataKey="count" fill="#3B82F6" />
+  </BarChart>
+</ResponsiveContainer>
+```
+
+### Bar Chart (Horizontal)
+```tsx
+<BarChart data={topProducts} layout="vertical">
+  <CartesianGrid strokeDasharray="3 3" />
+  <XAxis type="number" />
+  <YAxis type="category" dataKey="name" width={120} />
+  <Tooltip />
+  <Bar dataKey="value" fill="#10B981" />
+</BarChart>
+```
+
+### Pie Chart
+```tsx
+const COLORS = ['#3B82F6', '#10B981', '#F59E0B']
+
+<PieChart>
+  <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={100}>
+    {data.map((_, i) => (
+      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+    ))}
+  </Pie>
+  <Legend />
+</PieChart>
+```
+
+### Line Chart (Multiple Lines)
+```tsx
+<LineChart data={salesData}>
+  <XAxis dataKey="day" />
+  <YAxis yAxisId="left" />
+  <YAxis yAxisId="right" orientation="right" />
+  <Line yAxisId="left" dataKey="sales" stroke="#3B82F6" />
+  <Line yAxisId="right" dataKey="orders" stroke="#10B981" />
+</LineChart>
+```
+
+### useMemo for Chart Data
+```tsx
+// Transform API data for charts (ONLY when data changes)
+const chartData = useMemo(() => {
+  return products.reduce((acc, p) => {
+    acc[p.category] = (acc[p.category] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+}, [products])  // ← Dependency array!
+```
+
+### Java ↔ Recharts Comparison
+| Recharts | Java Equivalent |
+|----------|----------------|
+| BarChart | JFreeChart BarChart |
+| PieChart | JFreeChart PieChart |
+| ResponsiveContainer | Layout Manager |
+| useMemo | @Cacheable |
+
+---
+
 ## Quick Reference URLs
 
 | Service | URL |

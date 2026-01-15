@@ -17,7 +17,8 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build with relative API URL (nginx will proxy)
+# Build with RELATIVE API URL - nginx will proxy /api to backend
+# This is the KEY for Docker networking!
 ENV VITE_API_BASE_URL=/api
 ENV VITE_APP_NAME="ERP Inventory Manager"
 

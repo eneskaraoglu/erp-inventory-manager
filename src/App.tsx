@@ -19,6 +19,9 @@ import LoginPage from './pages/LoginPage'
 // Dashboard - Always loaded (main page)
 import Dashboard from './pages/Dashboard'
 
+// Dashboard with Charts - Lazy loaded (new!)
+const DashboardWithCharts = lazy(() => import('./pages/DashboardWithCharts'))
+
 // ============================================
 // LAZY LOADED PAGES - Code Splitting!
 // These are only loaded when the route is visited
@@ -94,8 +97,15 @@ function App() {
                 {/* PROTECTED ROUTES - Require authentication */}
                 {/* ============================================ */}
                 
-                {/* Dashboard - Not lazy (main entry) */}
+                {/* Dashboard with Charts - Main entry */}
                 <Route path="/" element={
+                  <ProtectedRoute>
+                    <DashboardWithCharts />
+                  </ProtectedRoute>
+                } />
+
+                {/* Old Dashboard - For comparison */}
+                <Route path="/dashboard-old" element={
                   <ProtectedRoute>
                     <Dashboard />
                   </ProtectedRoute>

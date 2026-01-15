@@ -1,81 +1,120 @@
+# ERP Inventory Manager - Frontend
 
+React frontend for the ERP Inventory Management System.
+
+## 🚀 Quick Start
+
+### Option 1: Docker (Recommended)
+
+```bash
+# Run with backend (see backend repo for full docker-compose)
+docker pull eneskaraoglu/erp-frontend:latest
+docker run -d -p 3000:80 eneskaraoglu/erp-frontend:latest
+
+# Access
+open http://localhost:3000
+```
+
+### Option 2: Local Development
+
+```bash
+# Install dependencies
 npm install
+
+# Start development server
 npm run dev
 
-npm install -D @tailwindcss/postcss
-npm install react-router-dom
-
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Access
+open http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**Note:** For local development, backend must be running on port 8001.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Project Structure
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+erp-inventory-manager/
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── layout/
+│   │   ├── ProductCard.tsx
+│   │   ├── ProtectedRoute.tsx
+│   │   └── ErrorBoundary.tsx
+│   ├── pages/               # Page components
+│   │   ├── Dashboard.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── ProductsPage.tsx
+│   │   ├── Customer/
+│   │   └── User/
+│   ├── context/             # React Context providers
+│   ├── hooks/               # Custom hooks
+│   ├── stores/              # Zustand stores
+│   ├── services/            # API services
+│   ├── types/               # TypeScript types
+│   └── validation/          # Zod schemas
+├── Dockerfile               # Multi-stage build
+├── docker-compose.yml       # Docker orchestration
+├── nginx.conf               # Nginx config with API proxy
+└── package.json
 ```
 
+## 🔐 Authentication
+
+JWT token-based authentication with role-based access.
+
+**Test Credentials:**
+| Role | Username | Password |
+|------|----------|----------|
+| Admin | admin | admin123 |
+| Manager | manager | manager123 |
+| User | johndoe | password123 |
+
+## 🐳 Docker
+
+### Build & Push
+
+```bash
+docker build -t eneskaraoglu/erp-frontend:latest .
+docker push eneskaraoglu/erp-frontend:latest
+```
+
+### Nginx Proxy
+
+The frontend uses Nginx to proxy `/api` requests to the backend container. This makes the app portable - works on any server without rebuilding!
+
+```nginx
+location /api {
+    proxy_pass http://backend:8001/api;
+}
+```
+
+## 🛠️ Tech Stack
+
+- **Framework:** React 19 + TypeScript
+- **Build Tool:** Vite
+- **Routing:** React Router v7
+- **State Management:** 
+  - Zustand (client state)
+  - React Query (server state)
+- **Styling:** Tailwind CSS
+- **Validation:** Zod
+- **Data Grid:** AG Grid
+
+## 📚 Documentation
+
+- [Session Notes](./docs/) - Learning journey documentation
+- [Concepts](./docs/CONCEPTS.md) - React concepts reference
+- [Progress](./docs/PROGRESS.md) - Learning progress tracker
+
+## 🧪 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+
+## 📝 License
+
+MIT
